@@ -1,13 +1,13 @@
 /**
- * [JSONPatchQueue description]
- * @param {JSON-Pointer} versionPath JSON-Pointers to version numbers
+ * JSON Patch Queue for asynchronous operations, and asynchronous networking.
+ * @param {Array<JSON-Pointer>} versionPaths JSON-Pointers to version numbers [local, remote]
  * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
- * @param {[type]} purity       [description]
+ * @param {Boolean} [purist]       If set to true adds test operation before replace.
  */
-var JSONPatchQueue = function(versionPath, apply, purity){
+var JSONPatchQueue = function(versionPaths, apply, purist){
 	/**
 	 * Queue of consecutive JSON Patch sequences. May contain gaps.
-	 * Item with index 0 has 1 sequence version gap to `this.version`.
+	 * Item with index 0 has 1 version gap to this.remoteVersion.
 	 * @type {Array}
 	 */
 	this.waiting = [];
@@ -15,20 +15,30 @@ var JSONPatchQueue = function(versionPath, apply, purity){
 	 * JSON-Pointer to local version in shared JSON document
 	 * @type {JSONPointer}
 	 */
-	this.versionPath = versionPath;
+	this.localPath = versionPaths[0];
+	/**
+	 * JSON-Pointer to remote version in shared JSON document
+	 * @type {JSONPointer}
+	 */
+	this.remotePath = versionPaths[1];
 	/**
 	 * Function to apply JSONPatchSequence to JSON object
 	 * @type {Function}
 	 */
 	this.apply = apply;
-
-	this.purity = purity;
+	/**
+	 * If set to true adds test operation before replace.
+	 * @type {Bool}
+	 */
+	this.purist = purist;
 
 };
-/** JSON version */
-JSONPatchQueue.prototype.version = 0;
-
-//JSONPatchQueue.prototype.purity = false;
+/** local version */
+JSONPatchQueue.prototype.localVersion = 0;
+/** Latest localVersion that we know that was acknowledged by remote */
+// JSONPatchQueue.prototype.ackVersion = 0;
+/** Latest acknowledged remote version */
+JSONPatchQueue.prototype.remoteVersion = 0;
 
 // instance property
 //  JSONPatchQueue.prototype.waiting = [];
@@ -38,27 +48,28 @@ JSONPatchQueue.prototype.version = 0;
 JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch){
 	var consecutivePatch = versionedJsonPatch.slice(0);
 	// strip Versioned JSON Patch specyfiv operation objects from given sequence
-		if(this.purity){
-			var testLocal = consecutivePatch.shift();
+		if(this.purist){
+			var testRemote = consecutivePatch.shift();
 		}
-		var replaceVersion = consecutivePatch.shift(),
-			newVersion = replaceVersion.value;
+		var replaceRemote = consecutivePatch.shift(),
+			newRemoteVersion = replaceRemote.value;
+		var testLocal = consecutivePatch.shift();
 
 	// TODO: perform versionedPath validation if needed (tomalec)
 
-	if( newVersion <= this.version){
+	if( newRemoteVersion <= this.remoteVersion){
 	// someone is trying to change something that was already updated
     	throw new Error("Given version was already applied.");
-	} else if ( newVersion == this.version + 1 ){ 
+	} else if ( newRemoteVersion == this.remoteVersion + 1 ){ 
 	// consecutive new version
 		while( consecutivePatch ){// process consecutive patch(-es)
 			this.apply(obj, consecutivePatch);
-			this.version++;
+			this.remoteVersion++;
 			consecutivePatch = this.waiting.shift();
 		}
 	} else {
 	// add sequence to queue in correct position.
-		this.waiting[newVersion - this.version -2] = consecutivePatch;
+		this.waiting[newRemoteVersion - this.remoteVersion -2] = consecutivePatch;
 	}
 };
 /**
@@ -67,17 +78,30 @@ JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch){
  * @return {VersionedJSONPatch}          
  */
 JSONPatchQueue.prototype.send = function(sequence){
-	this.version++;
-	sequence.unshift({
-		op: "replace",
-		path: this.versionPath,
-		value: this.version
-	});
-	if(this.purity){
-		sequence.unshift({ // test for purity
+	this.localVersion++;
+	if(this.purist){
+		sequence.unshift({ // test for consecutiveness
 			op: "test",
-			path: this.versionPath,
-			value: this.version-1
+			path: this.localPath,
+			value: this.localVersion - 1
+		},{ // replace for queue
+			op: "replace",
+			path: this.localPath,
+			value: this.localVersion
+		},{ // test for conflict resolutions
+			op: "test",
+			path: this.remotePath,
+			value: this.remoteVersion
+		});
+	} else {
+		sequence.unshift({ // replace for queue (+assumed test for consecutiveness_)
+			op: "replace",
+			path: this.localPath,
+			value: this.localVersion
+		},{// test for conflict resolutions
+			op: "test",
+			path: this.remotePath,
+			value: this.remoteVersion
 		});
 	}
 	return sequence;

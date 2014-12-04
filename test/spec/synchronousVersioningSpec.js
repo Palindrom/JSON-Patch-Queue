@@ -1,9 +1,9 @@
 var obj;
 
 
-describe("JSONPatchQueue instance", function () {
+describe("JSONPatchQueueSynchronous instance", function () {
   it('should be created with version 0 by default', function() {
-    var queue = new JSONPatchQueue("/version",function(){});
+    var queue = new JSONPatchQueueSynchronous("/version",function(){});
     expect(queue.version).toEqual(0);
   });
 
@@ -11,7 +11,7 @@ describe("JSONPatchQueue instance", function () {
     var queue, applyPatch;
     beforeEach(function () {
       applyPatch = jasmine.createSpy("applyPatch");
-      queue = new JSONPatchQueue("/version",function(){
+      queue = new JSONPatchQueueSynchronous("/version",function(){
         applyPatch.apply(this, arguments);
       });
     });
@@ -126,7 +126,7 @@ describe("JSONPatchQueue instance", function () {
   describe("when sends a JSON Patch", function () {
     var queue;
     beforeEach(function () {
-      queue = new JSONPatchQueue("/version", function(){});
+      queue = new JSONPatchQueueSynchronous("/version", function(){});
     });
     it("should return Versioned JSON Patch - JSON Patch with Version operation objects",function(){
       var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
@@ -136,7 +136,7 @@ describe("JSONPatchQueue instance", function () {
     it("should use versionPaths as specified in constructor",function(){
       var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
       expect(versionedJSONPatch1[0].path).toEqual("/version");
-      queue = new JSONPatchQueue("/meta/ver");
+      queue = new JSONPatchQueueSynchronous("/meta/ver");
       var versionedJSONPatch2 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
       expect(versionedJSONPatch2[0].path).toEqual("/meta/ver");
     });
@@ -149,4 +149,102 @@ describe("JSONPatchQueue instance", function () {
     });
   });
 
+  describe("in purist mode", function () {
+    var queue;
+    beforeEach(function () {
+      queue = new JSONPatchQueueSynchronous("/version",function(){}, true);
+    });
+    it("should send consecutiveness test",function(){
+      debugger
+      var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/foo', value: 'smth'}]);
+      expect(versionedJSONPatch1[0]).toEqual({op: 'test', path: '/version', value: 0});
+      expect(versionedJSONPatch1[1]).toEqual({op: 'replace', path: '/version', value: 1});
+    });
+
+    it("should receive consecutiveness test",function(){
+      expect(function(){
+        queue.receive(obj, [
+          {op: 'test', path: '/version', value: 0},
+          {op: 'replace', path: '/version', value: 1},
+          {op: 'replace', path: '/bar', value: 'smth'}]);
+      }).not.toThrow();
+      expect(queue.version).toEqual(1);
+    });
+
+  });
+
 });
+
+// Benchmark performance test
+if (typeof Benchmark !== 'undefined') {
+(function(){
+  var banchQueue, remoteCounter, localCounter, obj;
+  var suite = new Benchmark.Suite("JSONPatchQueueSynchronous",{
+    onError: function(error){
+      console.error(error);
+    }
+  });
+  suite.add(suite.name + ' receive operation sequence (replace)', function () {
+    banchQueue.receive(obj, [
+      {op: 'replace', path: '/version', value: remoteCounter},
+      {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
+    ]);
+
+    remoteCounter++;
+
+  },{
+    onStart: function(){
+      banchQueue = new JSONPatchQueueSynchronous("/version",function(){});
+      obj = {foo: 1, baz: [
+        {qux: 'hello'}
+      ]};
+      remoteCounter = 1;
+      localCounter = 0;
+    }
+  });
+  suite.add(suite.name + ' send operation sequence (replace)', function () {
+    banchQueue.send([
+      {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
+    ]);
+  },{
+    onStart: function(){
+      banchQueue = new JSONPatchQueueSynchronous("/version",function(){});
+      remoteCounter = 0;
+      localCounter = 0;
+    }
+  });
+
+  suite.add(suite.name + ' purist receive operation sequence (replace)', function () {
+    banchQueue.receive(obj, [
+      {op: 'test', path: '/version', value: remoteCounter-1}, //purist
+      {op: 'replace', path: '/version', value: remoteCounter},
+      {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
+    ]);
+
+    remoteCounter++;
+
+  },{
+    onStart: function(){
+      banchQueue = new JSONPatchQueueSynchronous("/version",function(){}, true);
+      obj = {foo: 1, baz: [
+        {qux: 'hello'}
+      ]};
+      remoteCounter = 1;
+      localCounter = 0;
+    }
+  });
+  suite.add(suite.name + ' purist send operation sequence (replace)', function () {
+    banchQueue.send([
+      {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
+    ]);
+  },{
+    onStart: function(){
+      banchQueue = new JSONPatchQueueSynchronous("/version",function(){}, true);
+      remoteCounter = 0;
+      localCounter = 0;
+    }
+  });
+
+  benchmarkReporter(suite);
+}());
+}
