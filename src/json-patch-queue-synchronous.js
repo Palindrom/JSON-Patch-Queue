@@ -66,18 +66,19 @@ JSONPatchQueueSynchronous.prototype.receive = function(obj, versionedJsonPatch){
  */
 JSONPatchQueueSynchronous.prototype.send = function(sequence){
 	this.version++;
-	sequence.unshift({
+	var newSequence = sequence.slice(0);
+	newSequence.unshift({
 		op: "replace",
 		path: this.versionPath,
 		value: this.version
 	});
 	if(this.purist){
-		sequence.unshift({ // test for purist
+		newSequence.unshift({ // test for purist
 			op: "test",
 			path: this.versionPath,
 			value: this.version-1
 		});
 	}
-	return sequence;
+	return newSequence;
 };
 

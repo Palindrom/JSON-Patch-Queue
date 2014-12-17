@@ -79,8 +79,9 @@ JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch){
  */
 JSONPatchQueue.prototype.send = function(sequence){
 	this.localVersion++;
+	var newSequence = sequence.slice(0);
 	if(this.purist){
-		sequence.unshift({ // test for consecutiveness
+		newSequence.unshift({ // test for consecutiveness
 			op: "test",
 			path: this.localPath,
 			value: this.localVersion - 1
@@ -94,7 +95,7 @@ JSONPatchQueue.prototype.send = function(sequence){
 			value: this.remoteVersion
 		});
 	} else {
-		sequence.unshift({ // replace for queue (+assumed test for consecutiveness_)
+		newSequence.unshift({ // replace for queue (+assumed test for consecutiveness_)
 			op: "replace",
 			path: this.localPath,
 			value: this.localVersion
@@ -104,5 +105,5 @@ JSONPatchQueue.prototype.send = function(sequence){
 			value: this.remoteVersion
 		});
 	}
-	return sequence;
+	return newSequence;
 };
