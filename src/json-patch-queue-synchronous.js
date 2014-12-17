@@ -50,8 +50,8 @@ JSONPatchQueueSynchronous.prototype.receive = function(obj, versionedJsonPatch){
 	} else if ( newVersion == this.version + 1 ){ 
 	// consecutive new version
 		while( consecutivePatch ){// process consecutive patch(-es)
-			this.apply(obj, consecutivePatch);
 			this.version++;
+			this.apply(obj, consecutivePatch);
 			consecutivePatch = this.waiting.shift();
 		}
 	} else {
