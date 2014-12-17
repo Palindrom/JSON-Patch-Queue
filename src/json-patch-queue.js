@@ -63,8 +63,8 @@ JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch){
 	} else if ( newRemoteVersion == this.remoteVersion + 1 ){ 
 	// consecutive new version
 		while( consecutivePatch ){// process consecutive patch(-es)
-			this.apply(obj, consecutivePatch);
 			this.remoteVersion++;
+			this.apply(obj, consecutivePatch);
 			consecutivePatch = this.waiting.shift();
 		}
 	} else {
