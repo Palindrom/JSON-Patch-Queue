@@ -53,7 +53,6 @@ JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch){
 		}
 		var replaceRemote = consecutivePatch.shift(),
 			newRemoteVersion = replaceRemote.value;
-		var testLocal = consecutivePatch.shift();
 
 	// TODO: perform versionedPath validation if needed (tomalec)
 

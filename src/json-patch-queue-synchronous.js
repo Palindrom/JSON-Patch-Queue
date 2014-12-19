@@ -37,7 +37,7 @@ JSONPatchQueueSynchronous.prototype.receive = function(obj, versionedJsonPatch){
 	var consecutivePatch = versionedJsonPatch.slice(0);
 	// strip Versioned JSON Patch specyfiv operation objects from given sequence
 		if(this.purist){
-			var testLocal = consecutivePatch.shift();
+			var testRemote = consecutivePatch.shift();
 		}
 		var replaceVersion = consecutivePatch.shift(),
 			newVersion = replaceVersion.value;
