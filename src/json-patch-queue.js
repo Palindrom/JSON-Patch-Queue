@@ -88,20 +88,12 @@ JSONPatchQueue.prototype.send = function(sequence){
 			op: "replace",
 			path: this.localPath,
 			value: this.localVersion
-		},{ // test for conflict resolutions
-			op: "test",
-			path: this.remotePath,
-			value: this.remoteVersion
 		});
 	} else {
 		newSequence.unshift({ // replace for queue (+assumed test for consecutiveness_)
 			op: "replace",
 			path: this.localPath,
 			value: this.localVersion
-		},{// test for conflict resolutions
-			op: "test",
-			path: this.remotePath,
-			value: this.remoteVersion
 		});
 	}
 	return newSequence;

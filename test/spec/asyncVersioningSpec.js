@@ -20,7 +20,7 @@ describe("JSONPatchQueue instance", function () {
     describe("with remote's version higher than current `remoteVersion + 1`", function () {
       var versionedJSONPatch3 = [
         {op: 'replace', path: '/remote', value: 3},
-        {op: 'test', path: '/local', value: 0},
+        //{op: 'test', path: '/local', value: 0}, // OT
         
         {op: 'add', path: '/bar', value: [1, 2, 3]},
         {op: 'replace', path: '/baz', value: 'smth'}
@@ -53,25 +53,25 @@ describe("JSONPatchQueue instance", function () {
     describe("with consecutive remote's version", function () {
       var versionedJSONPatch1 = [
         {op: 'replace', path: '/remote', value: 1},
-        {op: 'test', path: '/local', value: 0},
+        //{op: 'test', path: '/local', value: 0}, // OT
         
         {op: 'replace', path: '/baz', value: 'smth'}
       ];
       var versionedJSONPatch2 = [
         {op: 'replace', path: '/remote', value: 2},
-        {op: 'test', path: '/local', value: 0},
+        //{op: 'test', path: '/local', value: 0}, // OT
         
         {op: 'add', path: '/bar', value: [1, 2, 3]}
       ];
       var versionedJSONPatch3 = [
         {op: 'replace', path: '/remote', value: 3},
-        {op: 'test', path: '/local', value: 0},
+        //{op: 'test', path: '/local', value: 0}, // OT
         
         {op: 'replace', path: '/bool', value: false}
       ];
       var versionedJSONPatch5 = [
         {op: 'replace', path: '/remote', value: 5},
-        {op: 'test', path: '/local', value: 0},
+        //{op: 'test', path: '/local', value: 0}, // OT
         
         {op: 'replace', path: '/bool', value: true}
       ];
@@ -111,13 +111,13 @@ describe("JSONPatchQueue instance", function () {
         
         var versionedJSONPatch1 = [
           {op: 'replace', path: '/remote', value: 1},
-          {op: 'test', path: '/local', value: 0},
+          //{op: 'test', path: '/local', value: 0}, // OT
           
           {op: 'replace', path: '/baz', value: 'smth'}
         ];
         var versionedJSONPatch0 = [
           {op: 'replace', path: '/remote', value: 0},
-          {op: 'test', path: '/local', value: 0},
+          //{op: 'test', path: '/local', value: 0}, // OT
           
           {op: 'add', path: '/bar', value: [1, 2, 3]}
         ];
@@ -139,17 +139,17 @@ describe("JSONPatchQueue instance", function () {
     it("should return Versioned JSON Patch - JSON Patch with Version operation objects",function(){
       var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
       expect(versionedJSONPatch1[0].op).toEqual("replace");
-      expect(versionedJSONPatch1[1].op).toEqual("test");
+      //expect(versionedJSONPatch1[1].op).toEqual("test"); // OT
     });
 
     it("should use versionPaths as specified in constructor",function(){
       var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
       expect(versionedJSONPatch1[0].path).toEqual("/local");
-      expect(versionedJSONPatch1[1].path).toEqual("/remote");
+      // expect(versionedJSONPatch1[1].path).toEqual("/remote"); // OT
       queue = new JSONPatchQueue(["/meta/client","/meta/server"]);
       var versionedJSONPatch2 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
       expect(versionedJSONPatch2[0].path).toEqual("/meta/client");
-      expect(versionedJSONPatch2[1].path).toEqual("/meta/server");
+      // expect(versionedJSONPatch2[1].path).toEqual("/meta/server"); // OT
     });
 
     it("each time should send `replace` operation for consecutive local versions (as second operation object)",function(){
@@ -158,16 +158,17 @@ describe("JSONPatchQueue instance", function () {
       var versionedJSONPatch2 = queue.send([{op: 'replace', path: '/baz', value: 'smthelse'}]);
       expect(versionedJSONPatch2[0].value).toEqual(2);
     });
-    it("should send `test` operation for last acknowledged remote version (as first operation object)",function(){
-      var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/foo', value: 'smth'}]);
-      expect(versionedJSONPatch1[1].value).toEqual(0);
-      queue.receive(obj, [
-        {op: 'replace', path: '/remote', value: 1},
-        {op: 'test', path: '/local', value: 0},
-        {op: 'replace', path: '/bar', value: 'smth'}]);
-      var versionedJSONPatch2 = queue.send([{op: 'replace', path: '/baz', value: 'smthelse'}]);
-      expect(versionedJSONPatch2[1].value).toEqual(1);
-    });
+    // OT
+    // it("should send `test` operation for last acknowledged remote version (as first operation object)",function(){
+    //   var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/foo', value: 'smth'}]);
+    //   expect(versionedJSONPatch1[1].value).toEqual(0);
+    //   queue.receive(obj, [
+    //     {op: 'replace', path: '/remote', value: 1},
+    //     //{op: 'test', path: '/local', value: 0}, // OT
+    //     {op: 'replace', path: '/bar', value: 'smth'}]);
+    //   var versionedJSONPatch2 = queue.send([{op: 'replace', path: '/baz', value: 'smthelse'}]);
+    //   expect(versionedJSONPatch2[1].value).toEqual(1);
+    // });
   });
 
 
@@ -187,7 +188,7 @@ describe("JSONPatchQueue instance", function () {
         queue.receive(obj, [
           {op: 'test', path: '/remote', value: 0},
           {op: 'replace', path: '/remote', value: 1},
-          {op: 'test', path: '/local', value: 0},
+          //{op: 'test', path: '/local', value: 0}, // OT
           {op: 'replace', path: '/bar', value: 'smth'}]);
       }).not.toThrow();
       expect(queue.remoteVersion).toEqual(1);
@@ -209,7 +210,7 @@ if (typeof Benchmark !== 'undefined') {
   suite.add(suite.name + ' receive operation sequence (replace)', function () {
     banchQueue.receive(obj, [
       {op: 'replace', path: '/remote', value: remoteCounter},
-      {op: 'test', path: '/local', value: localCounter},
+      //{op: 'test', path: '/local', value: localCounter}, // OT
       {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
     ]);
 
@@ -243,7 +244,7 @@ if (typeof Benchmark !== 'undefined') {
     banchQueue.receive(obj, [
       {op: 'test', path: '/remote', value: remoteCounter-1}, //purist
       {op: 'replace', path: '/remote', value: remoteCounter},
-      {op: 'test', path: '/local', value: localCounter},
+      // {op: 'test', path: '/local', value: localCounter}, // OT
       {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
     ]);
 
