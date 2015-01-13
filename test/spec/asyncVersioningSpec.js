@@ -37,10 +37,12 @@ describe("JSONPatchQueue instance", function () {
       });
       it('should place JSON Patch sequence in `.waiting` array, according to versions distance', function() {
         expect(queue.waiting).toContain([
+          // {op: 'test', path: '/local', value: 0}, // OT
           {op: 'add', path: '/bar', value: [1, 2, 3]},
           {op: 'replace', path: '/baz', value: 'smth'}
         ]);
         expect(queue.waiting[1]).toEqual([
+          // {op: 'test', path: '/local', value: 0}, // OT
           {op: 'add', path: '/bar', value: [1, 2, 3]},
           {op: 'replace', path: '/baz', value: 'smth'}
         ]);
@@ -136,6 +138,10 @@ describe("JSONPatchQueue instance", function () {
     beforeEach(function () {
       queue = new JSONPatchQueue(["/local","/remote"],function(){});
     });
+    it("should increment `.localVersion`",function(){
+      var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
+      expect(queue.localVersion).toEqual(1);
+    });
     it("should return Versioned JSON Patch - JSON Patch with Version operation objects",function(){
       var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
       expect(versionedJSONPatch1[0].op).toEqual("replace");
@@ -226,6 +232,25 @@ if (typeof Benchmark !== 'undefined') {
       localCounter = 0;
     }
   });
+  suite.add(suite.name + ' queue received operation sequence', function () {
+    banchQueue.receive(obj, [
+      {op: 'replace', path: '/remote', value: remoteCounter},
+      // {op: 'test', path: '/local', value: localCounter}, // OT
+      {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
+    ]);
+
+    remoteCounter++;
+
+  },{
+    onStart: function(){
+      banchQueue = new JSONPatchQueue(["/local","/remote"],function(){});
+      obj = {foo: 1, baz: [
+        {qux: 'hello'}
+      ]};
+      remoteCounter = 2;
+      localCounter = 0;
+    }
+  });
 
 
   suite.add(suite.name + ' send operation sequence (replace)', function () {
@@ -257,6 +282,27 @@ if (typeof Benchmark !== 'undefined') {
         {qux: 'hello'}
       ]};
       remoteCounter = 1;
+      localCounter = 0;
+    }
+  });
+
+  suite.add(suite.name + ' purist queue received operation sequence', function () {
+    banchQueue.receive(obj, [
+      {op: 'test', path: '/remote', value: remoteCounter-1}, //purist
+      {op: 'replace', path: '/remote', value: remoteCounter},
+      // {op: 'test', path: '/local', value: localCounter}, // OT
+      {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
+    ]);
+
+    remoteCounter++;
+
+  },{
+    onStart: function(){
+      banchQueue = new JSONPatchQueue(["/local","/remote"],function(){}, true);
+      obj = {foo: 1, baz: [
+        {qux: 'hello'}
+      ]};
+      remoteCounter = 2;
       localCounter = 0;
     }
   });

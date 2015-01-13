@@ -128,6 +128,10 @@ describe("JSONPatchQueueSynchronous instance", function () {
     beforeEach(function () {
       queue = new JSONPatchQueueSynchronous("/version", function(){});
     });
+    it("should increment `.localVersion`",function(){
+      var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
+      expect(queue.version).toEqual(1);
+    });
     it("should return Versioned JSON Patch - JSON Patch with Version operation objects",function(){
       var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
       expect(versionedJSONPatch1[0].op).toEqual("replace");
@@ -202,6 +206,24 @@ if (typeof Benchmark !== 'undefined') {
       localCounter = 0;
     }
   });
+  suite.add(suite.name + ' queue received operation sequence', function () {
+    banchQueue.receive(obj, [
+      {op: 'replace', path: '/version', value: remoteCounter},
+      {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
+    ]);
+
+    remoteCounter++;
+
+  },{
+    onStart: function(){
+      banchQueue = new JSONPatchQueueSynchronous("/version",function(){});
+      obj = {foo: 1, baz: [
+        {qux: 'hello'}
+      ]};
+      remoteCounter = 2;
+      localCounter = 0;
+    }
+  });
   suite.add(suite.name + ' send operation sequence (replace)', function () {
     banchQueue.send([
       {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
@@ -230,6 +252,25 @@ if (typeof Benchmark !== 'undefined') {
         {qux: 'hello'}
       ]};
       remoteCounter = 1;
+      localCounter = 0;
+    }
+  });
+  suite.add(suite.name + ' queue purist received operation sequence', function () {
+    banchQueue.receive(obj, [
+      {op: 'test', path: '/version', value: remoteCounter-1}, //purist
+      {op: 'replace', path: '/version', value: remoteCounter},
+      {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
+    ]);
+
+    remoteCounter++;
+
+  },{
+    onStart: function(){
+      banchQueue = new JSONPatchQueueSynchronous("/version",function(){}, true);
+      obj = {foo: 1, baz: [
+        {qux: 'hello'}
+      ]};
+      remoteCounter = 2;
       localCounter = 0;
     }
   });
