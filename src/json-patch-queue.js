@@ -3,6 +3,7 @@
  * @param {Array<JSON-Pointer>} versionPaths JSON-Pointers to version numbers [local, remote]
  * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
  * @param {Boolean} [purist]       If set to true adds test operation before replace.
+ * version: 0.0.0
  */
 var JSONPatchQueue = function(versionPaths, apply, purist){
 	/**
@@ -59,7 +60,7 @@ JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch){
 	if( newRemoteVersion <= this.remoteVersion){
 	// someone is trying to change something that was already updated
     	throw new Error("Given version was already applied.");
-	} else if ( newRemoteVersion == this.remoteVersion + 1 ){ 
+	} else if ( newRemoteVersion == this.remoteVersion + 1 ){
 	// consecutive new version
 		while( consecutivePatch ){// process consecutive patch(-es)
 			this.remoteVersion++;
@@ -74,7 +75,7 @@ JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch){
 /**
  * Wraps JSON Patch sequence with version related operation objects
  * @param  {JSONPatch} sequence JSON Patch sequence to wrap
- * @return {VersionedJSONPatch}          
+ * @return {VersionedJSONPatch}
  */
 JSONPatchQueue.prototype.send = function(sequence){
 	this.localVersion++;

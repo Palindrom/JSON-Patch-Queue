@@ -3,6 +3,7 @@
  * @param {JSON-Pointer} versionPath JSON-Pointers to version numbers
  * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
  * @param {Boolean} [purist]       If set to true adds test operation before replace.
+ * @version: 0.0.0
  */
 var JSONPatchQueueSynchronous = function(versionPath, apply, purist){
 	/**
@@ -47,7 +48,7 @@ JSONPatchQueueSynchronous.prototype.receive = function(obj, versionedJsonPatch){
 	if( newVersion <= this.version){
 	// someone is trying to change something that was already updated
     	throw new Error("Given version was already applied.");
-	} else if ( newVersion == this.version + 1 ){ 
+	} else if ( newVersion == this.version + 1 ){
 	// consecutive new version
 		while( consecutivePatch ){// process consecutive patch(-es)
 			this.version++;
@@ -62,7 +63,7 @@ JSONPatchQueueSynchronous.prototype.receive = function(obj, versionedJsonPatch){
 /**
  * Wraps JSON Patch sequence with version related operation objects
  * @param  {JSONPatch} sequence JSON Patch sequence to wrap
- * @return {VersionedJSONPatch}          
+ * @return {VersionedJSONPatch}
  */
 JSONPatchQueueSynchronous.prototype.send = function(sequence){
 	this.version++;
@@ -81,4 +82,3 @@ JSONPatchQueueSynchronous.prototype.send = function(sequence){
 	}
 	return newSequence;
 };
-
