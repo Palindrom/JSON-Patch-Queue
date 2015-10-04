@@ -40,6 +40,11 @@ var versionedPatchToBeSent = myQueue.send(regularpatch);
 // to apply/queue received versioned  JSON Patch
 myQueue.receive(myObject, reveivedVersionedPatch);
 ```
+
+## Requirements
+
+Agent requires a function to apply JSON Patch, we suggest [fast JSON Patch](https://github.com/Starcounter-Jack/JSON-Patch) (`bower install fast-json-patch`).
+
 ## Methods
 
 Name      | Arguments                     | Default | Description
