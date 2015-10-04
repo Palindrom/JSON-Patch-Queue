@@ -14,7 +14,7 @@ Specific visualization will come soon.
 Install the component using [Bower](http://bower.io/):
 
 ```sh
-$ bower install PuppetJs/JSON-Patch-queue --save
+$ bower install json-patch-queue --save
 ```
 
 Or [download as ZIP](https://github.com/PuppetJs/JSON-Patch-Queue/archive/gh-pages.zip).
