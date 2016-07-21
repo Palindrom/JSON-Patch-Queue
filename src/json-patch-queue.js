@@ -23,10 +23,15 @@ var JSONPatchQueue = function(versionPaths, apply, purist){
 	 */
 	this.remotePath = versionPaths[1];
 	/**
-	 * Function to apply JSONPatchSequence to JSON object
+	 * Function to apply JSONPatchSequence to JSON object. This can be overridden / extended by deriving classes
 	 * @type {Function}
 	 */
 	this.apply = apply;
+	/**
+	 * Function to apply JSONPatchSequence to JSON object. This should not be overridden nor extended by deriving classes.
+	 * @type {Function}
+	 */
+	this.rawApply = apply;
 	/**
 	 * If set to true adds test operation before replace.
 	 * @type {Bool}
@@ -98,4 +103,16 @@ JSONPatchQueue.prototype.send = function(sequence){
 		});
 	}
 	return newSequence;
+};
+
+/**
+ * Reset queue internals and object to new, given state
+ * @param obj object to apply new state to
+ * @param newState versioned object representing desired state along with versions
+ */
+JSONPatchQueue.prototype.reset = function(obj, newState){
+	this.remoteVersion = newState[this.remotePath.replace(/^\//, '')];
+	this.waiting = [];
+	var patch = [{ op: "replace", path: "", value: newState }];
+	this.rawApply(obj, patch);
 };

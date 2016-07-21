@@ -82,3 +82,15 @@ JSONPatchQueueSynchronous.prototype.send = function(sequence){
 	}
 	return newSequence;
 };
+
+/**
+ * Reset queue internals and object to new, given state
+ * @param obj object to apply new state to
+ * @param newState versioned object representing desired state along with versions
+ */
+JSONPatchQueueSynchronous.prototype.reset = function(obj, newState){
+	this.version = newState[this.versionPath.replace(/^\//, '')];
+	this.waiting = [];
+	var patch = [{ op: "replace", path: "", value: newState }];
+	this.apply(obj, patch);
+};
