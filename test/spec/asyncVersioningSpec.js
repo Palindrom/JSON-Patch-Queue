@@ -1,3 +1,7 @@
+if(typeof JSONPatchQueue === 'undefined') {
+  JSONPatchQueue = require('../../src/json-patch-queue.js');
+}
+
 var obj;
 
 
@@ -21,7 +25,7 @@ describe("JSONPatchQueue instance", function () {
       var versionedJSONPatch3 = [
         {op: 'replace', path: '/remote', value: 3},
         //{op: 'test', path: '/local', value: 0}, // OT
-        
+
         {op: 'add', path: '/bar', value: [1, 2, 3]},
         {op: 'replace', path: '/baz', value: 'smth'}
       ];
@@ -56,25 +60,25 @@ describe("JSONPatchQueue instance", function () {
       var versionedJSONPatch1 = [
         {op: 'replace', path: '/remote', value: 1},
         //{op: 'test', path: '/local', value: 0}, // OT
-        
+
         {op: 'replace', path: '/baz', value: 'smth'}
       ];
       var versionedJSONPatch2 = [
         {op: 'replace', path: '/remote', value: 2},
         //{op: 'test', path: '/local', value: 0}, // OT
-        
+
         {op: 'add', path: '/bar', value: [1, 2, 3]}
       ];
       var versionedJSONPatch3 = [
         {op: 'replace', path: '/remote', value: 3},
         //{op: 'test', path: '/local', value: 0}, // OT
-        
+
         {op: 'replace', path: '/bool', value: false}
       ];
       var versionedJSONPatch5 = [
         {op: 'replace', path: '/remote', value: 5},
         //{op: 'test', path: '/local', value: 0}, // OT
-        
+
         {op: 'replace', path: '/bool', value: true}
       ];
 
@@ -109,18 +113,18 @@ describe("JSONPatchQueue instance", function () {
     describe("with remote's version lower or equal to current `remoteVersion`", function () {
 
       it('should throw an error', function() {
-        
-        
+
+
         var versionedJSONPatch1 = [
           {op: 'replace', path: '/remote', value: 1},
           //{op: 'test', path: '/local', value: 0}, // OT
-          
+
           {op: 'replace', path: '/baz', value: 'smth'}
         ];
         var versionedJSONPatch0 = [
           {op: 'replace', path: '/remote', value: 0},
           //{op: 'test', path: '/local', value: 0}, // OT
-          
+
           {op: 'add', path: '/bar', value: [1, 2, 3]}
         ];
         // apply some change

@@ -1,3 +1,6 @@
+if(typeof JSONPatchQueueSynchronous === 'undefined') {
+  JSONPatchQueueSynchronous = require('../../src/json-patch-queue-synchronous.js');
+}
 var obj;
 
 
@@ -19,7 +22,7 @@ describe("JSONPatchQueueSynchronous instance", function () {
     describe("with version higher than current `version + 1`", function () {
       var versionedJSONPatch3 = [
         {op: 'replace', path: '/version', value: 3},
-        
+
         {op: 'add', path: '/bar', value: [1, 2, 3]},
         {op: 'replace', path: '/baz', value: 'smth'}
       ];
@@ -51,22 +54,22 @@ describe("JSONPatchQueueSynchronous instance", function () {
     describe("with consecutive remote's version", function () {
       var versionedJSONPatch1 = [
         {op: 'replace', path: '/version', value: 1},
-        
+
         {op: 'replace', path: '/baz', value: 'smth'}
       ];
       var versionedJSONPatch2 = [
         {op: 'replace', path: '/version', value: 2},
-        
+
         {op: 'add', path: '/bar', value: [1, 2, 3]}
       ];
       var versionedJSONPatch3 = [
         {op: 'replace', path: '/version', value: 3},
-        
+
         {op: 'replace', path: '/bool', value: false}
       ];
       var versionedJSONPatch5 = [
         {op: 'replace', path: '/version', value: 5},
-        
+
         {op: 'replace', path: '/bool', value: true}
       ];
 
@@ -101,16 +104,16 @@ describe("JSONPatchQueueSynchronous instance", function () {
     describe("with remote's version lower or equal to current `version`", function () {
 
       it('should throw an error', function() {
-        
-        
+
+
         var versionedJSONPatch1 = [
           {op: 'replace', path: '/version', value: 1},
-          
+
           {op: 'replace', path: '/baz', value: 'smth'}
         ];
         var versionedJSONPatch0 = [
           {op: 'replace', path: '/version', value: 0},
-          
+
           {op: 'add', path: '/bar', value: [1, 2, 3]}
         ];
         // apply some change

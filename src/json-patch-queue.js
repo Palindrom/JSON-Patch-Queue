@@ -99,3 +99,7 @@ JSONPatchQueue.prototype.send = function(sequence){
 	}
 	return newSequence;
 };
+
+if (typeof module !== "undefined") {
+    module.exports = JSONPatchQueue;
+}
