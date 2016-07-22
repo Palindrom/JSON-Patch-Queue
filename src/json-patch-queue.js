@@ -23,15 +23,10 @@ var JSONPatchQueue = function(versionPaths, apply, purist){
 	 */
 	this.remotePath = versionPaths[1];
 	/**
-	 * Function to apply JSONPatchSequence to JSON object. This can be overridden / extended by deriving classes
+	 * Function to apply JSONPatchSequence to JSON object
 	 * @type {Function}
 	 */
 	this.apply = apply;
-	/**
-	 * Function to apply JSONPatchSequence to JSON object. This should not be overridden nor extended by deriving classes.
-	 * @type {Function}
-	 */
-	this.rawApply = apply;
 	/**
 	 * If set to true adds test operation before replace.
 	 * @type {Bool}
@@ -50,9 +45,16 @@ JSONPatchQueue.prototype.remoteVersion = 0;
 //  JSONPatchQueue.prototype.waiting = [];
 /** needed? OT only? */
 // JSONPatchQueue.prototype.pending = [];
-/* applies or adds to queue */
-JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch){
-	var consecutivePatch = versionedJsonPatch.slice(0);
+/**
+ * Process received versioned JSON Patch
+ * Applies or adds to queue.
+ * @param  {Object} obj                   object to apply patches to
+ * @param  {JSONPatch} versionedJsonPatch patch to be applied
+ * @param  {Function} [applyCallback]     optional `function(object, consecutivePatch)` to be called when applied, if not given #apply will be called
+ */
+JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch, applyCallback){
+	var apply = applyCallback || this.apply,
+		consecutivePatch = versionedJsonPatch.slice(0);
 	// strip Versioned JSON Patch specyfiv operation objects from given sequence
 		if(this.purist){
 			var testRemote = consecutivePatch.shift();
@@ -69,7 +71,7 @@ JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch){
 	// consecutive new version
 		while( consecutivePatch ){// process consecutive patch(-es)
 			this.remoteVersion++;
-			this.apply(obj, consecutivePatch);
+			apply(obj, consecutivePatch);
 			consecutivePatch = this.waiting.shift();
 		}
 	} else {
@@ -114,5 +116,9 @@ JSONPatchQueue.prototype.reset = function(obj, newState){
 	this.remoteVersion = newState[this.remotePath.replace(/^\//, '')];
 	this.waiting = [];
 	var patch = [{ op: "replace", path: "", value: newState }];
-	this.rawApply(obj, patch);
+	this.apply(obj, patch);
 };
+
+if (typeof module !== "undefined") {
+    module.exports = JSONPatchQueue;
+}

@@ -33,9 +33,16 @@ JSONPatchQueueSynchronous.prototype.version = 0;
 //JSONPatchQueueSynchronous.prototype.purist = false;
 // instance property
 //  JSONPatchQueueSynchronous.prototype.waiting = [];
-/* applies or adds to queue */
-JSONPatchQueueSynchronous.prototype.receive = function(obj, versionedJsonPatch){
-	var consecutivePatch = versionedJsonPatch.slice(0);
+/**
+ * Process received versioned JSON Patch.
+ * Applies or adds to queue.
+ * @param  {Object} obj                   object to apply patches to
+ * @param  {JSONPatch} versionedJsonPatch patch to be applied
+ * @param  {Function} [applyCallback]     optional `function(object, consecutivePatch)` to be called when applied, if not given #apply will be called
+ */
+JSONPatchQueueSynchronous.prototype.receive = function(obj, versionedJsonPatch, applyCallback){
+	var apply = applyCallback || this.apply,
+		consecutivePatch = versionedJsonPatch.slice(0);
 	// strip Versioned JSON Patch specyfiv operation objects from given sequence
 		if(this.purist){
 			var testRemote = consecutivePatch.shift();
@@ -52,7 +59,7 @@ JSONPatchQueueSynchronous.prototype.receive = function(obj, versionedJsonPatch){
 	// consecutive new version
 		while( consecutivePatch ){// process consecutive patch(-es)
 			this.version++;
-			this.apply(obj, consecutivePatch);
+			apply(obj, consecutivePatch);
 			consecutivePatch = this.waiting.shift();
 		}
 	} else {
@@ -94,3 +101,7 @@ JSONPatchQueueSynchronous.prototype.reset = function(obj, newState){
 	var patch = [{ op: "replace", path: "", value: newState }];
 	this.apply(obj, patch);
 };
+
+if (typeof module !== "undefined") {
+    module.exports = JSONPatchQueueSynchronous;
+}
