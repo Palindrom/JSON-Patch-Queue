@@ -1,6 +1,6 @@
 {
   "name": "json-patch-queue",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Queue for Versioned JSON-Patch - makes sure that your JSON Patches (RFC6902) gets applied in correct order",
   "main": "./src/json-patch-queue.js",
   "scripts": {

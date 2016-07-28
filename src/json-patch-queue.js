@@ -3,7 +3,7 @@
  * @param {Array<JSON-Pointer>} versionPaths JSON-Pointers to version numbers [local, remote]
  * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
  * @param {Boolean} [purist]       If set to true adds test operation before replace.
- * @version: 1.0.0
+ * @version: 1.1.0
  */
 var JSONPatchQueue = function(versionPaths, apply, purist){
 	/**
