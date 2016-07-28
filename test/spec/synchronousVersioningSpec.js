@@ -10,6 +10,30 @@ describe("JSONPatchQueueSynchronous instance", function () {
     expect(queue.version).toEqual(0);
   });
 
+  describe('when reset', function () {
+    it('should set remote version to value given', function () {
+      var queue = new JSONPatchQueueSynchronous("/version",function(){});
+      queue.reset({}, {version: 1});
+      expect(queue.version).toEqual(1);
+    });
+    it('should set remote version to value given even with complex version path', function () {
+      var queue = new JSONPatchQueueSynchronous("/v/version",function(){});
+      queue.reset({}, {v: {version: 1}});
+      expect(queue.version).toEqual(1);
+    });
+    it('should apply big replace patch to obj', function () {
+      var appliedPatch;
+      var queue = new JSONPatchQueueSynchronous("/version",function apply(obj, patches){
+        appliedPatch = patches;
+      });
+      var newState = {version: 1, name: 'newname'};
+
+      queue.reset({}, newState);
+
+      expect(appliedPatch).toEqual([{op: 'replace', path: '', value: newState}]);
+    });
+  });
+
   describe("when receives a Versioned JSON Patch", function () {
     var queue, applyPatch;
     beforeEach(function () {

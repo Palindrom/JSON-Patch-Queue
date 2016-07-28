@@ -12,6 +12,30 @@ describe("JSONPatchQueue instance", function () {
     expect(queue.remoteVersion).toEqual(0);
   });
 
+  describe('when reset', function () {
+    it('should set remote version to value given', function () {
+      var queue = new JSONPatchQueue(["/local","/remote"],function(){});
+      queue.reset({}, {local: 1, remote: 2});
+      expect(queue.remoteVersion).toEqual(2);
+    });
+    it('should set remote version to value given even with complex version path', function () {
+      var queue = new JSONPatchQueue(["/v/local","/v/remote"],function(){});
+      queue.reset({}, {v: {local: 1, remote: 2}});
+      expect(queue.remoteVersion).toEqual(2);
+    });
+    it('should apply big replace patch to obj', function () {
+      var appliedPatch;
+      var queue = new JSONPatchQueue(["/local","/remote"],function apply(obj, patches){
+        appliedPatch = patches;
+      });
+      var newState = {local: 1, remote: 2, name: 'newname'};
+
+      queue.reset({}, newState);
+
+      expect(appliedPatch).toEqual([{op: 'replace', path: '', value: newState}]);
+    });
+  });
+
   describe("when receives a Versioned JSON Patch", function () {
     var queue, applyPatch;
     beforeEach(function () {
