@@ -1,4 +1,4 @@
-# JSON-Patch-Queue [![Build Status](https://travis-ci.org/PuppetJs/JSON-Patch-Queue.svg?branch=gh-pages)](https://travis-ci.org/PuppetJs/JSON-Patch-Queue)
+# JSON-Patch-Queue [![Build Status](https://travis-ci.org/PuppetJs/JSON-Patch-Queue.svg?branch=master)](https://travis-ci.org/PuppetJs/JSON-Patch-Queue)
 > Makes your JSON Patch application sequential
 
 Implements a queue of JSON Patches, based on [Versioned JSON Patch](https://github.com/tomalec/Versioned-JSON-Patch) convention, that will resolve a problem of sequential application of JSON Patches.
@@ -17,7 +17,7 @@ Install the component using [Bower](http://bower.io/):
 $ bower install json-patch-queue --save
 ```
 
-Or [download as ZIP](https://github.com/PuppetJs/JSON-Patch-Queue/archive/gh-pages.zip).
+Or [download as ZIP](https://github.com/PuppetJs/JSON-Patch-Queue/archive/master.zip).
 
 ## Usage
 
