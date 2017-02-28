@@ -4,7 +4,7 @@ J# JSON-Patch-Queue [![Build Status](https://travis-ci.org/Palindrom/JSON-Patch-
 Implements a queue of JSON Patches, based on [Versioned JSON Patch](https://github.com/tomalec/Versioned-JSON-Patch) convention, that will resolve a problem of sequential application of JSON Patches.
 
 ## Demo
-[Full Versioned JSON Patch + OT visualization](http://tomalec.github.io/Palindrom-operational-transformation/visualization.html)
+[Full Versioned JSON Patch + OT visualization](http://tomalec.github.io/PuppetJs-operational-transformation/visualization.html)
 
 Specific visualization will come soon.
 
