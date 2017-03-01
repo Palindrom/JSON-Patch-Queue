@@ -1,4 +1,4 @@
-# JSON-Patch-Queue [![Build Status](https://travis-ci.org/PuppetJs/JSON-Patch-Queue.svg?branch=master)](https://travis-ci.org/PuppetJs/JSON-Patch-Queue)
+J# JSON-Patch-Queue [![Build Status](https://travis-ci.org/Palindrom/JSON-Patch-Queue.svg?branch=master)](https://travis-ci.org/Palindrom/JSON-Patch-Queue)
 > Makes your JSON Patch application sequential
 
 Implements a queue of JSON Patches, based on [Versioned JSON Patch](https://github.com/tomalec/Versioned-JSON-Patch) convention, that will resolve a problem of sequential application of JSON Patches.
@@ -17,7 +17,7 @@ Install the component using [Bower](http://bower.io/):
 $ bower install json-patch-queue --save
 ```
 
-Or [download as ZIP](https://github.com/PuppetJs/JSON-Patch-Queue/archive/master.zip).
+Or [download as ZIP](https://github.com/Palindrom/JSON-Patch-Queue/archive/master.zip).
 
 ## Usage
 
@@ -100,7 +100,7 @@ Name      | Type      | Description
 
 ## History
 
-For detailed changelog, check [Releases](https://github.com/PuppetJs/JSON-Patch-Queue/releases).
+For detailed changelog, check [Releases](https://github.com/Palindrom/JSON-Patch-Queue/releases).
 
 ## License
 
@@ -108,6 +108,6 @@ MIT
 
 ## See also
 - [fast JSON Patch](https://github.com/Starcounter-Jack/JSON-Patch)
-- [JSON Patch OT](https://github.com/PuppetJs/JSON-Patch-OT)
-- [JSON Patch OT Agent](https://github.com/PuppetJs/JSON-Patch-OT-agent)
-- ...putting it all together: [PuppetJs](https://github.com/PuppetJs/PuppetJs)
+- [JSON Patch OT](https://github.com/Palindrom/JSON-Patch-OT)
+- [JSON Patch OT Agent](https://github.com/Palindrom/JSON-Patch-OT-agent)
+- ...putting it all together: [Palindrom](https://github.com/Palindrom/Palindrom)
