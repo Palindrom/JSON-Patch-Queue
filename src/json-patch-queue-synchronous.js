@@ -1,9 +1,9 @@
 /**
  * JSON Patch Queue for synchronous operations, and asynchronous networking.
+ * version: 2.0.0
  * @param {JSON-Pointer} versionPath JSON-Pointers to version numbers
  * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
  * @param {Boolean} [purist]       If set to true adds test operation before replace.
- * @version: 1.0.0
  */
 var JSONPatchQueueSynchronous = function(versionPath, apply, purist){
 	/**
@@ -117,6 +117,9 @@ JSONPatchQueueSynchronous.prototype.reset = function(obj, newState){
 	this.apply(obj, patch);
 };
 
-if (typeof module !== "undefined") {
-    module.exports = JSONPatchQueueSynchronous;
+if(typeof module !== undefined) {
+	module.exports = JSONPatchQueueSynchronous;
+	module.exports.default = JSONPatchQueueSynchronous;
+	/* Babel demands this */
+	module.exports.__esModule = true;
 }

@@ -1,4 +1,5 @@
 J# JSON-Patch-Queue [![Build Status](https://travis-ci.org/Palindrom/JSON-Patch-Queue.svg?branch=master)](https://travis-ci.org/Palindrom/JSON-Patch-Queue)
+
 > Makes your JSON Patch application sequential
 
 Implements a queue of JSON Patches, based on [Versioned JSON Patch](https://github.com/tomalec/Versioned-JSON-Patch) convention, that will resolve a problem of sequential application of JSON Patches.
@@ -8,8 +9,15 @@ Implements a queue of JSON Patches, based on [Versioned JSON Patch](https://gith
 
 Specific visualization will come soon.
 
-
 ## Install
+
+Install the component using NPM
+
+```sh
+$ npm install json-patch-queue --save
+```
+
+Or
 
 Install the component using [Bower](http://bower.io/):
 
@@ -28,7 +36,7 @@ var myQueue = new JSONPatchQueueSynchronous("/path_to_version", jsonpatch);
 // to compose versioned JSON Patch, to be send somewhere?
 var versionedPatchToBeSent = myQueue.send(regularpatch);
 // to apply/queue received versioned  JSON Patch
-myQueue.receive(myObject, reveivedVersionedPatch);
+myQueue.receive(myObject, receivedVersionedPatch);
 ```
 
 ### Multiple Versioned
@@ -38,7 +46,7 @@ var myQueue = new JSONPatchQueue(["/local_version", "/remote_version"], jsonpatc
 // to compose versioned JSON Patch, to be send somewhere?
 var versionedPatchToBeSent = myQueue.send(regularpatch);
 // to apply/queue received versioned  JSON Patch
-myQueue.receive(myObject, reveivedVersionedPatch);
+myQueue.receive(myObject, receivedVersionedPatch);
 ```
 
 ## Requirements
