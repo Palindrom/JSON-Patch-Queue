@@ -28,7 +28,7 @@ var myQueue = new JSONPatchQueueSynchronous("/path_to_version", jsonpatch);
 // to compose versioned JSON Patch, to be send somewhere?
 var versionedPatchToBeSent = myQueue.send(regularpatch);
 // to apply/queue received versioned  JSON Patch
-myQueue.receive(myObject, reveivedVersionedPatch);
+myQueue.receive(myObject, receivedVersionedPatch);
 ```
 
 ### Multiple Versioned
@@ -38,7 +38,7 @@ var myQueue = new JSONPatchQueue(["/local_version", "/remote_version"], jsonpatc
 // to compose versioned JSON Patch, to be send somewhere?
 var versionedPatchToBeSent = myQueue.send(regularpatch);
 // to apply/queue received versioned  JSON Patch
-myQueue.receive(myObject, reveivedVersionedPatch);
+myQueue.receive(myObject, receivedVersionedPatch);
 ```
 
 ## Requirements
