@@ -1,16 +1,14 @@
-console.warn('Please use the production versions in `dist` folder, this file will be removed soon');
-
 /**
- * JSON Patch Queue for asynchronous operations, and asynchronous networking.
- * @param {Array<JSON-Pointer>} versionPaths JSON-Pointers to version numbers [local, remote]
+ * JSON Patch Queue for synchronous operations, and asynchronous networking.
+ * @param {JSON-Pointer} versionPath JSON-Pointers to version numbers
  * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
  * @param {Boolean} [purist]       If set to true adds test operation before replace.
  * @version: 1.0.0
  */
-var JSONPatchQueue = function(versionPaths, apply, purist){
+var JSONPatchQueueSynchronous = function(versionPath, apply, purist){
 	/**
 	 * Queue of consecutive JSON Patch sequences. May contain gaps.
-	 * Item with index 0 has 1 version gap to this.remoteVersion.
+	 * Item with index 0 has 1 sequence version gap to `this.version`.
 	 * @type {Array}
 	 */
 	this.waiting = [];
@@ -18,12 +16,7 @@ var JSONPatchQueue = function(versionPaths, apply, purist){
 	 * JSON-Pointer to local version in shared JSON document
 	 * @type {JSONPointer}
 	 */
-	this.localPath = versionPaths[0];
-	/**
-	 * JSON-Pointer to remote version in shared JSON document
-	 * @type {JSONPointer}
-	 */
-	this.remotePath = versionPaths[1];
+	this.versionPath = versionPath;
 	/**
 	 * Function to apply JSONPatchSequence to JSON object
 	 * @type {Function}
@@ -34,51 +27,44 @@ var JSONPatchQueue = function(versionPaths, apply, purist){
 	 * @type {Bool}
 	 */
 	this.purist = purist;
-
 };
-/** local version */
-JSONPatchQueue.prototype.localVersion = 0;
-/** Latest localVersion that we know that was acknowledged by remote */
-// JSONPatchQueue.prototype.ackVersion = 0;
-/** Latest acknowledged remote version */
-JSONPatchQueue.prototype.remoteVersion = 0;
-
+/** JSON version */
+JSONPatchQueueSynchronous.prototype.version = 0;
+//JSONPatchQueueSynchronous.prototype.purist = false;
 // instance property
-//  JSONPatchQueue.prototype.waiting = [];
-/** needed? OT only? */
-// JSONPatchQueue.prototype.pending = [];
+//  JSONPatchQueueSynchronous.prototype.waiting = [];
 /**
- * Process received versioned JSON Patch
+ * Process received versioned JSON Patch.
  * Applies or adds to queue.
  * @param  {Object} obj                   object to apply patches to
  * @param  {JSONPatch} versionedJsonPatch patch to be applied
  * @param  {Function} [applyCallback]     optional `function(object, consecutivePatch)` to be called when applied, if not given #apply will be called
  */
-JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch, applyCallback){
+JSONPatchQueueSynchronous.prototype.receive = function(obj, versionedJsonPatch, applyCallback){
 	var apply = applyCallback || this.apply,
 		consecutivePatch = versionedJsonPatch.slice(0);
 	// strip Versioned JSON Patch specyfiv operation objects from given sequence
 		if(this.purist){
 			var testRemote = consecutivePatch.shift();
 		}
-		var replaceRemote = consecutivePatch.shift(),
-			newRemoteVersion = replaceRemote.value;
+		var replaceVersion = consecutivePatch.shift(),
+			newVersion = replaceVersion.value;
 
 	// TODO: perform versionedPath validation if needed (tomalec)
 
-	if( newRemoteVersion <= this.remoteVersion){
+	if( newVersion <= this.version){
 	// someone is trying to change something that was already updated
     	throw new Error("Given version was already applied.");
-	} else if ( newRemoteVersion == this.remoteVersion + 1 ){
+	} else if ( newVersion == this.version + 1 ){
 	// consecutive new version
 		while( consecutivePatch ){// process consecutive patch(-es)
-			this.remoteVersion++;
+			this.version++;
 			apply(obj, consecutivePatch);
 			consecutivePatch = this.waiting.shift();
 		}
 	} else {
 	// add sequence to queue in correct position.
-		this.waiting[newRemoteVersion - this.remoteVersion -2] = consecutivePatch;
+		this.waiting[newVersion - this.version -2] = consecutivePatch;
 	}
 };
 /**
@@ -86,30 +72,25 @@ JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch, applyCallba
  * @param  {JSONPatch} sequence JSON Patch sequence to wrap
  * @return {VersionedJSONPatch}
  */
-JSONPatchQueue.prototype.send = function(sequence){
-	this.localVersion++;
+JSONPatchQueueSynchronous.prototype.send = function(sequence){
+	this.version++;
 	var newSequence = sequence.slice(0);
+	newSequence.unshift({
+		op: "replace",
+		path: this.versionPath,
+		value: this.version
+	});
 	if(this.purist){
-		newSequence.unshift({ // test for consecutiveness
+		newSequence.unshift({ // test for purist
 			op: "test",
-			path: this.localPath,
-			value: this.localVersion - 1
-		},{ // replace for queue
-			op: "replace",
-			path: this.localPath,
-			value: this.localVersion
-		});
-	} else {
-		newSequence.unshift({ // replace for queue (+assumed test for consecutiveness_)
-			op: "replace",
-			path: this.localPath,
-			value: this.localVersion
+			path: this.versionPath,
+			value: this.version-1
 		});
 	}
 	return newSequence;
 };
 
-JSONPatchQueue.getPropertyByJsonPointer = function(obj, pointer) {
+JSONPatchQueueSynchronous.getPropertyByJsonPointer = function(obj, pointer) {
 	var parts = pointer.split('/');
 	if(parts[0] === "") {
 		parts.shift();
@@ -129,13 +110,12 @@ JSONPatchQueue.getPropertyByJsonPointer = function(obj, pointer) {
  * @param obj object to apply new state to
  * @param newState versioned object representing desired state along with versions
  */
-JSONPatchQueue.prototype.reset = function(obj, newState){
-	this.remoteVersion = JSONPatchQueue.getPropertyByJsonPointer(newState, this.remotePath);
+JSONPatchQueueSynchronous.prototype.reset = function(obj, newState){
+	this.version = JSONPatchQueueSynchronous.getPropertyByJsonPointer(newState, this.versionPath);
 	this.waiting = [];
 	var patch = [{ op: "replace", path: "", value: newState }];
 	this.apply(obj, patch);
 };
 
-if (typeof module !== "undefined") {
-    module.exports = JSONPatchQueue;
-}
+module.exports = JSONPatchQueueSynchronous;
+module.exports.default = JSONPatchQueueSynchronous;

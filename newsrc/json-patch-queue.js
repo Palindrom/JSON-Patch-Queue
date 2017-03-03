@@ -1,5 +1,3 @@
-console.warn('Please use the production versions in `dist` folder, this file will be removed soon');
-
 /**
  * JSON Patch Queue for asynchronous operations, and asynchronous networking.
  * @param {Array<JSON-Pointer>} versionPaths JSON-Pointers to version numbers [local, remote]
@@ -136,6 +134,5 @@ JSONPatchQueue.prototype.reset = function(obj, newState){
 	this.apply(obj, patch);
 };
 
-if (typeof module !== "undefined") {
-    module.exports = JSONPatchQueue;
-}
+module.exports = JSONPatchQueue;
+module.exports.default = JSONPatchQueue;

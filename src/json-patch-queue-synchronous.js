@@ -1,3 +1,4 @@
+console.warn('Please use the production versions in `dist` folder, this file will be removed soon');
 /**
  * JSON Patch Queue for synchronous operations, and asynchronous networking.
  * @param {JSON-Pointer} versionPath JSON-Pointers to version numbers
