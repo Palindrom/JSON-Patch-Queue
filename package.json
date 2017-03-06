@@ -4,9 +4,9 @@
   "description": "Queue for Versioned JSON-Patch - makes sure that your JSON Patches (RFC6902) gets applied in correct order",
   "main": "./dist/json-patch-queue-module.js",
   "scripts": {
-    "test": "jasmine JASMINE_CONFIG_PATH=test/spec/support/jasmine.json",
-    "test-sync": "jasmine test/spec/synchronousVersioningSpec.js JASMINE_CONFIG_PATH=test/spec/support/jasmine.json",
-    "test-async": "jasmine test/spec/asyncVersioningSpec.js JASMINE_CONFIG_PATH=test/spec/support/jasmine.json"
+    "test": "jasmine test/spec/*.js",
+    "test-sync": "jasmine test/spec/synchronousVersioningSpec.js",
+    "test-async": "jasmine test/spec/asyncVersioningSpec.js"
   },
   "repository": {
     "type": "git",

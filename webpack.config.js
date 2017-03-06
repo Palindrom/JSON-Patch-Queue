@@ -3,7 +3,7 @@ var webpack = require("webpack");
 module.exports = [
   /* bundle individual files for browsers */
   {
-    entry: "./newsrc/json-patch-queue.js",
+    entry: "./src/json-patch-queue.js",
     output: {
       filename: "dist/json-patch-queue.min.js",
       library: "JSONPatchQueue",
@@ -22,7 +22,7 @@ module.exports = [
   },
   /* bundle individual files for browsers */
   {
-    entry: "./newsrc/json-patch-queue-synchronous.js",
+    entry: "./src/json-patch-queue-synchronous.js",
     output: {
       filename: "dist/json-patch-queue-synchronous.min.js",
       library: "JSONPatchQueueSynchronous",
@@ -40,9 +40,9 @@ module.exports = [
     ]
   },
   /* now for node, bundle them together, so you can `require` them easily
-  for a clearer concept, check newsrc/index.js */
+  for a clearer concept, check src/index.js */
   {
-    entry: "./newsrc/index.js",
+    entry: "./src/index.js",
     output: {
       filename: "dist/json-patch-queue-module.js",
       library: "JSONPatchQueue",
