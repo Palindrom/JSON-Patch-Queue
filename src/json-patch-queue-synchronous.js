@@ -117,6 +117,9 @@ JSONPatchQueueSynchronous.prototype.reset = function(obj, newState){
 	this.apply(obj, patch);
 };
 
-if (typeof module !== "undefined") {
-    module.exports = JSONPatchQueueSynchronous;
+if(typeof module !== undefined) {
+	module.exports = JSONPatchQueueSynchronous;
+	module.exports.default = JSONPatchQueueSynchronous;
+	/* Babel demands this */
+	module.exports.__esModule = true;
 }
