@@ -1,8 +1,8 @@
 {
   "name": "json-patch-queue",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Queue for Versioned JSON-Patch - makes sure that your JSON Patches (RFC6902) gets applied in correct order",
-  "main": "./dist/json-patch-queue-module.js",
+  "main": "./src/index.js",
   "scripts": {
     "test": "jasmine test/spec/*.js",
     "test-sync": "jasmine test/spec/synchronousVersioningSpec.js",
@@ -29,6 +29,9 @@
     "node": ">= 0.4.0"
   },
   "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-bump": "^0.8.0",
+    "grunt-contrib-uglify": "^2.2.0",
     "jasmine": "^2.4.1"
   }
 }

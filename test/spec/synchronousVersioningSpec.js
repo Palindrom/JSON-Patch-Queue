@@ -1,5 +1,5 @@
 if(typeof JSONPatchQueueSynchronous === 'undefined') {
-  JSONPatchQueueSynchronous = require('../../dist/json-patch-queue-module.js').JSONPatchQueueSynchronous;
+  JSONPatchQueueSynchronous = require('../../src/index').JSONPatchQueueSynchronous;
 }
 var obj;
 

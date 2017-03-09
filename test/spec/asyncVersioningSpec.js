@@ -1,5 +1,5 @@
 if(typeof JSONPatchQueue === 'undefined') {
-  JSONPatchQueue = require('../../dist/json-patch-queue-module.js').JSONPatchQueue;
+  JSONPatchQueue = require('../../src/index').JSONPatchQueue;
 }
 
 var obj;
