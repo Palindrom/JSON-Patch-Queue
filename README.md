@@ -1,4 +1,5 @@
 J# JSON-Patch-Queue [![Build Status](https://travis-ci.org/Palindrom/JSON-Patch-Queue.svg?branch=master)](https://travis-ci.org/Palindrom/JSON-Patch-Queue)
+
 > Makes your JSON Patch application sequential
 
 Implements a queue of JSON Patches, based on [Versioned JSON Patch](https://github.com/tomalec/Versioned-JSON-Patch) convention, that will resolve a problem of sequential application of JSON Patches.
@@ -7,7 +8,6 @@ Implements a queue of JSON Patches, based on [Versioned JSON Patch](https://gith
 [Full Versioned JSON Patch + OT visualization](http://tomalec.github.io/PuppetJs-operational-transformation/visualization.html)
 
 Specific visualization will come soon.
-
 
 ## Install
 

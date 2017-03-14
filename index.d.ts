@@ -1,11 +1,11 @@
 export class JSONPatchQueueSynchronous {
     /**
- * JSON Patch Queue for synchronous operations, and asynchronous networking.
- * version: 2.0.0
- * @param {JSON-Pointer} versionPath JSON-Pointers to version numbers
- * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
- * @param {Boolean} [purist]       If set to true adds test operation before replace.
- */
+     * JSON Patch Queue for synchronous operations, and asynchronous networking.
+     * @version: 2.0.0
+     * @param {JSON-Pointer} versionPath JSON-Pointers to version numbers
+     * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
+     * @param {Boolean} [purist]       If set to true adds test operation before replace.
+     */
     constructor(versionPath: String, apply: Function, purist: Boolean);
     public version: Number;
 
@@ -17,7 +17,6 @@ export class JSONPatchQueueSynchronous {
     * @param  {Function} [applyCallback]     optional `function(object, consecutivePatch)` to be called when applied, if not given #apply will be called
     */
     public receive(obj: Object, versionedJsonPatch: Object, applyCallback: Function);
-
 
     /**
     * Wraps JSON Patch sequence with version related operation objects
