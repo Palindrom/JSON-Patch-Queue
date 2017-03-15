@@ -1,6 +1,6 @@
 /**
  * JSON Patch Queue for asynchronous operations, and asynchronous networking.
- * version: 2.0.0
+ * version: 2.0.1
  * @param {Array<JSON-Pointer>} versionPaths JSON-Pointers to version numbers [local, remote]
  * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
  * @param {Boolean} [purist]       If set to true adds test operation before replace.
@@ -134,7 +134,7 @@ JSONPatchQueue.prototype.reset = function(obj, newState){
 	this.apply(obj, patch);
 };
 
-if(typeof module !== undefined) {
+if(typeof module !== 'undefined') {
 	module.exports = JSONPatchQueue;
 	module.exports.default = JSONPatchQueue;
 	/* Babel demands this */
