@@ -1,6 +1,6 @@
 {
   "name": "json-patch-queue",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "homepage": "https://github.com/Palindrom/JSON-Patch-queue",
   "description": "Queue for Versioned JSON-Patch - makes sure that your JSON Patches (RFC6902) gets applied in correct order",
   "authors": [

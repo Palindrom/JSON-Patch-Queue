@@ -1,7 +1,7 @@
 export class JSONPatchQueueSynchronous {
     /**
  * JSON Patch Queue for synchronous operations, and asynchronous networking.
- * version: 2.0.0
+ * version: 2.0.1
  * @param {JSON-Pointer} versionPath JSON-Pointers to version numbers
  * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
  * @param {Boolean} [purist]       If set to true adds test operation before replace.
