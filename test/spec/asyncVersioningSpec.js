@@ -7,30 +7,33 @@ var obj;
 
 describe("JSONPatchQueue instance", function () {
   it('should be created with versions 0,0 by default', function() {
-    var queue = new JSONPatchQueue(["/local","/remote"],function(){});
+    var queue = new JSONPatchQueue({}, ["/local","/remote"],function(){});
     expect(queue.localVersion).toEqual(0);
     expect(queue.remoteVersion).toEqual(0);
   });
 
   describe('when reset', function () {
     it('should set remote version to value given', function () {
-      var queue = new JSONPatchQueue(["/local","/remote"],function(){});
-      queue.reset({}, {local: 1, remote: 2});
+      var obj = {};
+      var queue = new JSONPatchQueue(obj, ["/local","/remote"],function(){});
+      queue.reset(obj, {local: 1, remote: 2});
       expect(queue.remoteVersion).toEqual(2);
     });
     it('should set remote version to value given even with complex version path', function () {
-      var queue = new JSONPatchQueue(["/v/local","/v/remote"],function(){});
-      queue.reset({}, {v: {local: 1, remote: 2}});
+      var obj = {};
+      var queue = new JSONPatchQueue(obj, ["/v/local","/v/remote"],function(){});
+      queue.reset(obj, {v: {local: 1, remote: 2}});
       expect(queue.remoteVersion).toEqual(2);
     });
     it('should apply big replace patch to obj', function () {
       var appliedPatch;
-      var queue = new JSONPatchQueue(["/local","/remote"],function apply(obj, patches){
+      var obj = {};
+      var queue = new JSONPatchQueue(obj, ["/local","/remote"], function apply(obj, patches){
         appliedPatch = patches;
       });
       var newState = {local: 1, remote: 2, name: 'newname'};
 
-      queue.reset({}, newState);
+      queue.reset(obj, newState);
 
       expect(appliedPatch).toEqual([{op: 'replace', path: '', value: newState}]);
     });
@@ -38,9 +41,10 @@ describe("JSONPatchQueue instance", function () {
 
   describe("when receives a Versioned JSON Patch", function () {
     var queue, applyPatch;
+    var obj = {};
     beforeEach(function () {
       applyPatch = jasmine.createSpy("applyPatch");
-      queue = new JSONPatchQueue(["/local","/remote"],function(){
+      queue = new JSONPatchQueue(obj, ["/local","/remote"], function(){
         applyPatch.apply(this, arguments);
       });
     });
@@ -55,13 +59,13 @@ describe("JSONPatchQueue instance", function () {
       ];
 
       beforeEach(function () {
-        obj = {foo: 1, baz: [{qux: 'hello'}]};
-        queue.receive(obj, versionedJSONPatch3);
+        queue.obj = {foo: 1, baz: [{qux: 'hello'}]};
+        queue.receive(versionedJSONPatch3);
       });
 
       it('should not apply given JSON Patch sequence', function() {
         expect(applyPatch).not.toHaveBeenCalled()
-        expect(obj).toEqual({foo: 1, baz: [{qux: 'hello'}]})
+        expect(queue.obj).toEqual({foo: 1, baz: [{qux: 'hello'}]})
       });
       it('should place JSON Patch sequence in `.waiting` array, according to versions distance', function() {
         expect(queue.waiting).toContain([
@@ -107,25 +111,25 @@ describe("JSONPatchQueue instance", function () {
       ];
 
       beforeEach(function () {
-        obj = {foo: 1, baz: [{qux: 'hello'}]};
+        queue.obj = {foo: 1, baz: [{qux: 'hello'}]};
         //add something to the queue
-        queue.receive(obj, versionedJSONPatch2);
-        queue.receive(obj, versionedJSONPatch3);
+        queue.receive(versionedJSONPatch2);
+        queue.receive(versionedJSONPatch3);
         // receive consecutive patch
-        queue.receive(obj, versionedJSONPatch1);
+        queue.receive(versionedJSONPatch1);
 
       });
 
       it('should apply given JSON Patch sequence', function() {
-        expect(applyPatch).toHaveBeenCalledWith(obj, [{op: 'replace', path: '/baz', value: 'smth'}]);
-        expect(applyPatch.calls.argsFor(0)).toEqual([obj, [{op: 'replace', path: '/baz', value: 'smth'}]]);
+        expect(applyPatch).toHaveBeenCalledWith(queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]);
+        expect(applyPatch.calls.argsFor(0)).toEqual([queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]]);
       });
       it('should apply queued, consecutive Patch sequences', function() {
         expect(applyPatch.calls.count()).toEqual(3);
         expect(applyPatch.calls.allArgs()).toEqual([
-          [obj, [{op: 'replace', path: '/baz', value: 'smth'}]],// JSONPatch1
-          [obj, [{op: 'add', path: '/bar', value: [1, 2, 3]}]],// JSONPatch2
-          [obj, [{op: 'replace', path: '/bool', value: false}]]// JSONPatch3
+          [queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]],// JSONPatch1
+          [queue.obj, [{op: 'add', path: '/bar', value: [1, 2, 3]}]],// JSONPatch2
+          [queue.obj, [{op: 'replace', path: '/bool', value: false}]]// JSONPatch3
         ]);
       });
       it('should update `remoteVersion` accordingly', function() {
@@ -137,8 +141,6 @@ describe("JSONPatchQueue instance", function () {
     describe("with remote's version lower or equal to current `remoteVersion`", function () {
 
       it('should throw an error', function() {
-
-
         var versionedJSONPatch1 = [
           {op: 'replace', path: '/remote', value: 1},
           //{op: 'test', path: '/local', value: 0}, // OT
@@ -152,7 +154,7 @@ describe("JSONPatchQueue instance", function () {
           {op: 'add', path: '/bar', value: [1, 2, 3]}
         ];
         // apply some change
-        queue.receive(obj, versionedJSONPatch1);
+        queue.receive(versionedJSONPatch1);
         // try to apply same
         expect(function(){queue.receive(obj, versionedJSONPatch1);}).toThrow();
         // try to apply lower
@@ -164,7 +166,7 @@ describe("JSONPatchQueue instance", function () {
   describe("when sends a JSON Patch", function () {
     var queue;
     beforeEach(function () {
-      queue = new JSONPatchQueue(["/local","/remote"],function(){});
+      queue = new JSONPatchQueue({}, ["/local","/remote"],function(){});
     });
     it("should increment `.localVersion`",function(){
       var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
@@ -180,7 +182,7 @@ describe("JSONPatchQueue instance", function () {
       var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
       expect(versionedJSONPatch1[0].path).toEqual("/local");
       // expect(versionedJSONPatch1[1].path).toEqual("/remote"); // OT
-      queue = new JSONPatchQueue(["/meta/client","/meta/server"]);
+      queue = new JSONPatchQueue({}, ["/meta/client","/meta/server"]);
       var versionedJSONPatch2 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
       expect(versionedJSONPatch2[0].path).toEqual("/meta/client");
       // expect(versionedJSONPatch2[1].path).toEqual("/meta/server"); // OT
@@ -209,7 +211,7 @@ describe("JSONPatchQueue instance", function () {
   describe("in purist mode", function () {
     var queue;
     beforeEach(function () {
-      queue = new JSONPatchQueue(["/local","/remote"],function(){}, true);
+      queue = new JSONPatchQueue({}, ["/local","/remote"],function(){}, true);
     });
     it("should send consecutiveness test for local version",function(){
       var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/foo', value: 'smth'}]);
@@ -219,7 +221,7 @@ describe("JSONPatchQueue instance", function () {
 
     it("should receive consecutiveness test from remote",function(){
       expect(function(){
-        queue.receive(obj, [
+        queue.receive([
           {op: 'test', path: '/remote', value: 0},
           {op: 'replace', path: '/remote', value: 1},
           //{op: 'test', path: '/local', value: 0}, // OT
@@ -252,16 +254,16 @@ if (typeof Benchmark !== 'undefined') {
 
   },{
     onStart: function(){
-      banchQueue = new JSONPatchQueue(["/local","/remote"],function(){});
       obj = {foo: 1, baz: [
         {qux: 'hello'}
       ]};
+      banchQueue = new JSONPatchQueue(obj, ["/local","/remote"],function(){});      
       remoteCounter = 1;
       localCounter = 0;
     }
   });
   suite.add(suite.name + ' queue received operation sequence', function () {
-    banchQueue.receive(obj, [
+    banchQueue.receive([
       {op: 'replace', path: '/remote', value: remoteCounter},
       // {op: 'test', path: '/local', value: localCounter}, // OT
       {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
@@ -271,10 +273,10 @@ if (typeof Benchmark !== 'undefined') {
 
   },{
     onStart: function(){
-      banchQueue = new JSONPatchQueue(["/local","/remote"],function(){});
       obj = {foo: 1, baz: [
         {qux: 'hello'}
       ]};
+      banchQueue = new JSONPatchQueue(obj, ["/local","/remote"],function(){});      
       remoteCounter = 2;
       localCounter = 0;
     }
@@ -287,14 +289,14 @@ if (typeof Benchmark !== 'undefined') {
     ]);
   },{
     onStart: function(){
-      banchQueue = new JSONPatchQueue(["/local","/remote"],function(){});
+      banchQueue = new JSONPatchQueue({}, ["/local","/remote"],function(){});
       remoteCounter = 0;
       localCounter = 0;
     }
   });
 
   suite.add(suite.name + ' purist receive operation sequence (replace)', function () {
-    banchQueue.receive(obj, [
+    banchQueue.receive([
       {op: 'test', path: '/remote', value: remoteCounter-1}, //purist
       {op: 'replace', path: '/remote', value: remoteCounter},
       // {op: 'test', path: '/local', value: localCounter}, // OT
@@ -305,17 +307,17 @@ if (typeof Benchmark !== 'undefined') {
 
   },{
     onStart: function(){
-      banchQueue = new JSONPatchQueue(["/local","/remote"],function(){}, true);
-      obj = {foo: 1, baz: [
+       obj = {foo: 1, baz: [
         {qux: 'hello'}
       ]};
+      banchQueue = new JSONPatchQueue(obj, ["/local","/remote"],function(){}, true);     
       remoteCounter = 1;
       localCounter = 0;
     }
   });
 
   suite.add(suite.name + ' purist queue received operation sequence', function () {
-    banchQueue.receive(obj, [
+    banchQueue.receive([
       {op: 'test', path: '/remote', value: remoteCounter-1}, //purist
       {op: 'replace', path: '/remote', value: remoteCounter},
       // {op: 'test', path: '/local', value: localCounter}, // OT
@@ -326,10 +328,10 @@ if (typeof Benchmark !== 'undefined') {
 
   },{
     onStart: function(){
-      banchQueue = new JSONPatchQueue(["/local","/remote"],function(){}, true);
       obj = {foo: 1, baz: [
         {qux: 'hello'}
       ]};
+      banchQueue = new JSONPatchQueue(obj, ["/local","/remote"],function(){}, true);      
       remoteCounter = 2;
       localCounter = 0;
     }
@@ -340,7 +342,7 @@ if (typeof Benchmark !== 'undefined') {
     ]);
   },{
     onStart: function(){
-      banchQueue = new JSONPatchQueue(["/local","/remote"],function(){}, true);
+      banchQueue = new JSONPatchQueue({}, ["/local","/remote"],function(){}, true);
       remoteCounter = 0;
       localCounter = 0;
     }

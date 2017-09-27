@@ -1,11 +1,18 @@
 /**
  * JSON Patch Queue for asynchronous operations, and asynchronous networking.
  * version: 2.0.1
+ * @param {Object} Obj The target object where patches are applied
  * @param {Array<JSON-Pointer>} versionPaths JSON-Pointers to version numbers [local, remote]
  * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
  * @param {Boolean} [purist]       If set to true adds test operation before replace.
  */
-var JSONPatchQueue = function(versionPaths, apply, purist){
+var JSONPatchQueue = function(obj, versionPaths, apply, purist){
+
+	/**
+	 * The target object where patches are applied
+	 * @type {Object}
+	 */
+	this.obj = obj;
 	/**
 	 * Queue of consecutive JSON Patch sequences. May contain gaps.
 	 * Item with index 0 has 1 version gap to this.remoteVersion.
@@ -52,7 +59,7 @@ JSONPatchQueue.prototype.remoteVersion = 0;
  * @param  {JSONPatch} versionedJsonPatch patch to be applied
  * @param  {Function} [applyCallback]     optional `function(object, consecutivePatch)` to be called when applied, if not given #apply will be called
  */
-JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch, applyCallback){
+JSONPatchQueue.prototype.receive = function(versionedJsonPatch, applyCallback){
 	var apply = applyCallback || this.apply,
 		consecutivePatch = versionedJsonPatch.slice(0);
 	// strip Versioned JSON Patch specyfiv operation objects from given sequence
@@ -71,7 +78,7 @@ JSONPatchQueue.prototype.receive = function(obj, versionedJsonPatch, applyCallba
 	// consecutive new version
 		while( consecutivePatch ){// process consecutive patch(-es)
 			this.remoteVersion++;
-			apply(obj, consecutivePatch);
+			apply(this.obj, consecutivePatch);
 			consecutivePatch = this.waiting.shift();
 		}
 	} else {
@@ -131,7 +138,7 @@ JSONPatchQueue.prototype.reset = function(obj, newState){
 	this.remoteVersion = JSONPatchQueue.getPropertyByJsonPointer(newState, this.remotePath);
 	this.waiting = [];
 	var patch = [{ op: "replace", path: "", value: newState }];
-	this.apply(obj, patch);
+	return this.obj = this.apply(obj, patch);
 };
 
 if(typeof module !== 'undefined') {

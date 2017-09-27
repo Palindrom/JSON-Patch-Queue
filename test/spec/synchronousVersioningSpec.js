@@ -6,24 +6,28 @@ var obj;
 
 describe("JSONPatchQueueSynchronous instance", function () {
   it('should be created with version 0 by default', function() {
-    var queue = new JSONPatchQueueSynchronous("/version",function(){});
+    var queue = new JSONPatchQueueSynchronous({}, "/version",function(){});
     expect(queue.version).toEqual(0);
   });
 
   describe('when reset', function () {
     it('should set remote version to value given', function () {
-      var queue = new JSONPatchQueueSynchronous("/version",function(){});
-      queue.reset({}, {version: 1});
+      var obj = {};
+      var queue = new JSONPatchQueueSynchronous(obj, "/version",function(){});
+      queue.reset(obj, {version: 1});
       expect(queue.version).toEqual(1);
     });
     it('should set remote version to value given even with complex version path', function () {
-      var queue = new JSONPatchQueueSynchronous("/v/version",function(){});
+
+      var obj = {};
+      var queue = new JSONPatchQueueSynchronous(obj, "/v/version",function(){});
       queue.reset({}, {v: {version: 1}});
       expect(queue.version).toEqual(1);
     });
     it('should apply big replace patch to obj', function () {
       var appliedPatch;
-      var queue = new JSONPatchQueueSynchronous("/version",function apply(obj, patches){
+      var obj = {};
+      var queue = new JSONPatchQueueSynchronous(obj, "/version",function apply(obj, patches){
         appliedPatch = patches;
       });
       var newState = {version: 1, name: 'newname'};
@@ -38,7 +42,7 @@ describe("JSONPatchQueueSynchronous instance", function () {
     var queue, applyPatch;
     beforeEach(function () {
       applyPatch = jasmine.createSpy("applyPatch");
-      queue = new JSONPatchQueueSynchronous("/version",function(){
+      queue = new JSONPatchQueueSynchronous({}, "/version",function(){
         applyPatch.apply(this, arguments);
       });
     });
@@ -52,13 +56,13 @@ describe("JSONPatchQueueSynchronous instance", function () {
       ];
 
       beforeEach(function () {
-        obj = {foo: 1, baz: [{qux: 'hello'}]};
-        queue.receive(obj, versionedJSONPatch3);
+        queue.obj = {foo: 1, baz: [{qux: 'hello'}]};
+        queue.receive(versionedJSONPatch3);
       });
 
       it('should not apply given JSON Patch sequence', function() {
         expect(applyPatch).not.toHaveBeenCalled()
-        expect(obj).toEqual({foo: 1, baz: [{qux: 'hello'}]})
+        expect(queue.obj).toEqual({foo: 1, baz: [{qux: 'hello'}]})
       });
       it('should place JSON Patch sequence in `.waiting` array, according to versions distance', function() {
         expect(queue.waiting).toContain([
@@ -98,25 +102,25 @@ describe("JSONPatchQueueSynchronous instance", function () {
       ];
 
       beforeEach(function () {
-        obj = {foo: 1, baz: [{qux: 'hello'}]};
+        queue.obj = {foo: 1, baz: [{qux: 'hello'}]}; 
         //add something to the queue
-        queue.receive(obj, versionedJSONPatch2);
-        queue.receive(obj, versionedJSONPatch3);
+        queue.receive(versionedJSONPatch2);
+        queue.receive(versionedJSONPatch3);
         // receive consecutive patch
-        queue.receive(obj, versionedJSONPatch1);
+        queue.receive(versionedJSONPatch1);
 
       });
 
       it('should apply given JSON Patch sequence', function() {
-        expect(applyPatch).toHaveBeenCalledWith(obj, [{op: 'replace', path: '/baz', value: 'smth'}]);
-        expect(applyPatch.calls.argsFor(0)).toEqual([obj, [{op: 'replace', path: '/baz', value: 'smth'}]]);
+        expect(applyPatch).toHaveBeenCalledWith(queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]);
+        expect(applyPatch.calls.argsFor(0)).toEqual([queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]]);
       });
       it('should apply queued, consecutive Patch sequences', function() {
         expect(applyPatch.calls.count()).toEqual(3);
         expect(applyPatch.calls.allArgs()).toEqual([
-          [obj, [{op: 'replace', path: '/baz', value: 'smth'}]],// JSONPatch1
-          [obj, [{op: 'add', path: '/bar', value: [1, 2, 3]}]],// JSONPatch2
-          [obj, [{op: 'replace', path: '/bool', value: false}]]// JSONPatch3
+          [queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]],// JSONPatch1
+          [queue.obj, [{op: 'add', path: '/bar', value: [1, 2, 3]}]],// JSONPatch2
+          [queue.obj, [{op: 'replace', path: '/bool', value: false}]]// JSONPatch3
         ]);
       });
       it('should update `version` accordingly', function() {
@@ -141,11 +145,11 @@ describe("JSONPatchQueueSynchronous instance", function () {
           {op: 'add', path: '/bar', value: [1, 2, 3]}
         ];
         // apply some change
-        queue.receive(obj, versionedJSONPatch1);
+        queue.receive(versionedJSONPatch1);
         // try to apply same
-        expect(function(){queue.receive(obj, versionedJSONPatch1);}).toThrow();
+        expect(function(){queue.receive(versionedJSONPatch1);}).toThrow();
         // try to apply lower
-        expect(function(){queue.receive(obj, versionedJSONPatch0);}).toThrow();
+        expect(function(){queue.receive(versionedJSONPatch0);}).toThrow();
       });
     });
   });
@@ -153,7 +157,7 @@ describe("JSONPatchQueueSynchronous instance", function () {
   describe("when sends a JSON Patch", function () {
     var queue;
     beforeEach(function () {
-      queue = new JSONPatchQueueSynchronous("/version", function(){});
+      queue = new JSONPatchQueueSynchronous({}, "/version", function(){});
     });
     it("should increment `.localVersion`",function(){
       var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
@@ -167,7 +171,7 @@ describe("JSONPatchQueueSynchronous instance", function () {
     it("should use versionPaths as specified in constructor",function(){
       var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
       expect(versionedJSONPatch1[0].path).toEqual("/version");
-      queue = new JSONPatchQueueSynchronous("/meta/ver");
+      queue = new JSONPatchQueueSynchronous({}, "/meta/ver");
       var versionedJSONPatch2 = queue.send([{op: 'replace', path: '/baz', value: 'smth'}]);
       expect(versionedJSONPatch2[0].path).toEqual("/meta/ver");
     });
@@ -183,7 +187,7 @@ describe("JSONPatchQueueSynchronous instance", function () {
   describe("in purist mode", function () {
     var queue;
     beforeEach(function () {
-      queue = new JSONPatchQueueSynchronous("/version",function(){}, true);
+      queue = new JSONPatchQueueSynchronous({}, "/version",function(){}, true);
     });
     it("should send consecutiveness test",function(){
       debugger
@@ -194,7 +198,7 @@ describe("JSONPatchQueueSynchronous instance", function () {
 
     it("should receive consecutiveness test",function(){
       expect(function(){
-        queue.receive(obj, [
+        queue.receive([
           {op: 'test', path: '/version', value: 0},
           {op: 'replace', path: '/version', value: 1},
           {op: 'replace', path: '/bar', value: 'smth'}]);
@@ -216,7 +220,7 @@ if (typeof Benchmark !== 'undefined') {
     }
   });
   suite.add(suite.name + ' receive operation sequence (replace)', function () {
-    banchQueue.receive(obj, [
+    banchqueue.receive([
       {op: 'replace', path: '/version', value: remoteCounter},
       {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
     ]);
@@ -225,16 +229,16 @@ if (typeof Benchmark !== 'undefined') {
 
   },{
     onStart: function(){
-      banchQueue = new JSONPatchQueueSynchronous("/version",function(){});
       obj = {foo: 1, baz: [
         {qux: 'hello'}
       ]};
+      banchQueue = new JSONPatchQueueSynchronous(obj, "/version",function(){});      
       remoteCounter = 1;
       localCounter = 0;
     }
   });
   suite.add(suite.name + ' queue received operation sequence', function () {
-    banchQueue.receive(obj, [
+    banchqueue.receive([
       {op: 'replace', path: '/version', value: remoteCounter},
       {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
     ]);
@@ -243,10 +247,11 @@ if (typeof Benchmark !== 'undefined') {
 
   },{
     onStart: function(){
-      banchQueue = new JSONPatchQueueSynchronous("/version",function(){});
       obj = {foo: 1, baz: [
         {qux: 'hello'}
       ]};
+      banchQueue = new JSONPatchQueueSynchronous(obj, "/version",function(){});
+      
       remoteCounter = 2;
       localCounter = 0;
     }
@@ -257,14 +262,14 @@ if (typeof Benchmark !== 'undefined') {
     ]);
   },{
     onStart: function(){
-      banchQueue = new JSONPatchQueueSynchronous("/version",function(){});
+      banchQueue = new JSONPatchQueueSynchronous({}, "/version",function(){});
       remoteCounter = 0;
       localCounter = 0;
     }
   });
 
   suite.add(suite.name + ' purist receive operation sequence (replace)', function () {
-    banchQueue.receive(obj, [
+    banchQueue.receive([
       {op: 'test', path: '/version', value: remoteCounter-1}, //purist
       {op: 'replace', path: '/version', value: remoteCounter},
       {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
@@ -274,16 +279,16 @@ if (typeof Benchmark !== 'undefined') {
 
   },{
     onStart: function(){
-      banchQueue = new JSONPatchQueueSynchronous("/version",function(){}, true);
       obj = {foo: 1, baz: [
         {qux: 'hello'}
       ]};
+      banchQueue = new JSONPatchQueueSynchronous(obj, "/version",function(){}, true);      
       remoteCounter = 1;
       localCounter = 0;
     }
   });
   suite.add(suite.name + ' queue purist received operation sequence', function () {
-    banchQueue.receive(obj, [
+    banchQueue.receive([
       {op: 'test', path: '/version', value: remoteCounter-1}, //purist
       {op: 'replace', path: '/version', value: remoteCounter},
       {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
