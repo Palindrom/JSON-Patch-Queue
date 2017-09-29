@@ -29,6 +29,7 @@ describe("JSONPatchQueueSynchronous instance", function () {
       var obj = {};
       var queue = new JSONPatchQueueSynchronous(obj, "/version",function apply(obj, patches){
         appliedPatch = patches;
+        return obj;
       });
       var newState = {version: 1, name: 'newname'};
 
@@ -44,6 +45,7 @@ describe("JSONPatchQueueSynchronous instance", function () {
       applyPatch = jasmine.createSpy("applyPatch");
       queue = new JSONPatchQueueSynchronous({}, "/version",function(){
         applyPatch.apply(this, arguments);
+        return arguments[0];
       });
     });
 
@@ -112,6 +114,7 @@ describe("JSONPatchQueueSynchronous instance", function () {
       });
 
       it('should apply given JSON Patch sequence', function() {
+        debugger
         expect(applyPatch).toHaveBeenCalledWith(queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]);
         expect(applyPatch.calls.argsFor(0)).toEqual([queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]]);
       });

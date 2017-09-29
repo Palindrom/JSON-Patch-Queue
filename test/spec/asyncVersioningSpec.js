@@ -46,6 +46,7 @@ describe("JSONPatchQueue instance", function () {
       applyPatch = jasmine.createSpy("applyPatch");
       queue = new JSONPatchQueue(obj, ["/local","/remote"], function(){
         applyPatch.apply(this, arguments);
+        return arguments[0]
       });
     });
 

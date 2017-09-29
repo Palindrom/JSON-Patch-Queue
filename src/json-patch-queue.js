@@ -1,7 +1,7 @@
 /**
  * JSON Patch Queue for asynchronous operations, and asynchronous networking.
  * version: 2.0.1
- * @param {Object} Obj The target object where patches are applied
+ * @param {Object} obj The target object where patches are applied
  * @param {Array<JSON-Pointer>} versionPaths JSON-Pointers to version numbers [local, remote]
  * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
  * @param {Boolean} [purist]       If set to true adds test operation before replace.
@@ -55,7 +55,6 @@ JSONPatchQueue.prototype.remoteVersion = 0;
 /**
  * Process received versioned JSON Patch
  * Applies or adds to queue.
- * @param  {Object} obj                   object to apply patches to
  * @param  {JSONPatch} versionedJsonPatch patch to be applied
  * @param  {Function} [applyCallback]     optional `function(object, consecutivePatch)` to be called when applied, if not given #apply will be called
  */
@@ -78,7 +77,7 @@ JSONPatchQueue.prototype.receive = function(versionedJsonPatch, applyCallback){
 	// consecutive new version
 		while( consecutivePatch ){// process consecutive patch(-es)
 			this.remoteVersion++;
-			apply(this.obj, consecutivePatch);
+			this.obj = apply(this.obj, consecutivePatch);
 			consecutivePatch = this.waiting.shift();
 		}
 	} else {

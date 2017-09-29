@@ -1,4 +1,4 @@
-J# JSON-Patch-Queue [![Build Status](https://travis-ci.org/Palindrom/JSON-Patch-Queue.svg?branch=master)](https://travis-ci.org/Palindrom/JSON-Patch-Queue)
+# JSON-Patch-Queue [![Build Status](https://travis-ci.org/Palindrom/JSON-Patch-Queue.svg?branch=master)](https://travis-ci.org/Palindrom/JSON-Patch-Queue)
 
 > Makes your JSON Patch application sequential
 
@@ -31,22 +31,27 @@ Or [download as ZIP](https://github.com/Palindrom/JSON-Patch-Queue/archive/maste
 
 ### Single Versioned
 ```javascript
+
+var targetObject = {};
 // create queue
-var myQueue = new JSONPatchQueueSynchronous("/path_to_version", jsonpatch);
+var myQueue = new JSONPatchQueueSynchronous(targetObject, "/path_to_version", jsonpatch);
 // to compose versioned JSON Patch, to be send somewhere?
 var versionedPatchToBeSent = myQueue.send(regularpatch);
 // to apply/queue received versioned  JSON Patch
-myQueue.receive(myObject, receivedVersionedPatch);
+myQueue.receive(receivedVersionedPatch);
 ```
 
 ### Multiple Versioned
 ```javascript
+
+var targetObject = {};
+
 // create queue
-var myQueue = new JSONPatchQueue(["/local_version", "/remote_version"], jsonpatch);
+var myQueue = new JSONPatchQueue(targetObject, ["/local_version", "/remote_version"], jsonpatch);
 // to compose versioned JSON Patch, to be send somewhere?
 var versionedPatchToBeSent = myQueue.send(regularpatch);
 // to apply/queue received versioned  JSON Patch
-myQueue.receive(myObject, receivedVersionedPatch);
+myQueue.receive(receivedVersionedPatch);
 ```
 
 ## Requirements
@@ -58,31 +63,32 @@ Agent requires a function to apply JSON Patch, we suggest [fast JSON Patch](http
 Name      | Arguments                     | Default | Description
 ---       | ---                           | ---     | ---
 `send`    | *JSONPatch* sequence          |         | Changes given JSON Patch to Versioned JSON Patch
-`receive` |                               |         | Receives, and eventually applies given Versioned JSON Patch, to the object
-          | *Object* obj                  |         | object to be changed
-          | *VersionedJSONPatch* sequence |         | Versioned JSON Patch to be queued and applied
+`receive` | *VersionedJSONPatch* sequence Versioned JSON Patch to be queued and applied |         | Receives, and eventually applies given Versioned JSON Patch, to the object passed in the constructor
 
 #### Multiple Versioned
 
 Name                         | Arguments            | Default | Description
 ---                          | ---                  | ---     | ---
-`JSONPatchQueue`  | *Array* *JSONPointer* [localVersionPath, remoteVersionPath] |         | Paths where to store the versions
-                             | *Function* apply     |         | `function(object, patch)` function to apply JSON Patch
-                             | *Boolean* purist     | `false` | set to `true` to enable pure/unoptimized Versioned JSON Patch convention
+`JSONPatchQueue`             | *`Object`* obj     | ---     | Target object where patches are applied
+                             | *`Array<JSONPointer>`* `[localVersionPath, remoteVersionPath]` |         | Paths where to store the versions
+                             | *`Function`* apply     |         | `function(object, patch)` function to apply JSON Patch, must return the object in its final state
+                             | *`Boolean`* purist     | `false` | set to `true` to enable pure/unoptimized Versioned JSON Patch convention
 
 #### Single Versioned
 
 Name                         | Arguments            | Default | Description
 ---                          | ---                  | ---     | ---
-`JSONPatchQueueSynchronous`  | *JSONPointer* versionPath |         | Path where to store the version
-                             | *Function* apply     |         | `function(object, patch)` function to apply JSON Patch
-                             | *Boolean* purist     | `false` | set to `true` to enable pure/unoptimized Versioned JSON Patch convention
+`JSONPatchQueueSynchronous`  | *`Object`* *obj*       |         | Target object where patches are applied
+                             | *`JSONPointer`* versionPath |         | Path where to store the version
+                             | *`Function`* apply     |         | `function(object, patch)` function to apply JSON Patch, must return the object in its final
+                             | *`Boolean`* purist     | `false` | set to `true` to enable pure/unoptimized Versioned JSON Patch convention
 
 ## Properties
 
 Name      | Type                          | Description
 ---       | ---                           | ---
-`waiting` | *Array* *JSONPatch*           | Array of JSON Patches waiting in queue
+`obj    ` | *`Object`*                    | Target object where patches are applied
+`waiting` | *`Array<JSONPatch>`*          | Array of JSON Patches waiting in queue
 
 #### Multiple Versioned
 

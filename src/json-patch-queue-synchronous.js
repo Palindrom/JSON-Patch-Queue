@@ -66,7 +66,7 @@ JSONPatchQueueSynchronous.prototype.receive = function(versionedJsonPatch, apply
 	// consecutive new version
 		while( consecutivePatch ){// process consecutive patch(-es)
 			this.version++;
-			apply(this.obj, consecutivePatch);
+			this.obj = apply(this.obj, consecutivePatch);
 			consecutivePatch = this.waiting.shift();
 		}
 	} else {
