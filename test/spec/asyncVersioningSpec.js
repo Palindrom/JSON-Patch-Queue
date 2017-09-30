@@ -2,7 +2,7 @@ if(typeof JSONPatchQueue === 'undefined') {
   JSONPatchQueue = require('../../src/index').JSONPatchQueue;
 }
 
-var obj;
+var obj = {foo: 1, baz: [{qux: 'hello'}]};
 
 
 describe("JSONPatchQueue instance", function () {
@@ -14,20 +14,17 @@ describe("JSONPatchQueue instance", function () {
 
   describe('when reset', function () {
     it('should set remote version to value given', function () {
-      var obj = {};
       var queue = new JSONPatchQueue(obj, ["/local","/remote"],function(){});
       queue.reset(obj, {local: 1, remote: 2});
       expect(queue.remoteVersion).toEqual(2);
     });
     it('should set remote version to value given even with complex version path', function () {
-      var obj = {};
       var queue = new JSONPatchQueue(obj, ["/v/local","/v/remote"],function(){});
       queue.reset(obj, {v: {local: 1, remote: 2}});
       expect(queue.remoteVersion).toEqual(2);
     });
     it('should apply big replace patch to obj', function () {
       var appliedPatch;
-      var obj = {};
       var queue = new JSONPatchQueue(obj, ["/local","/remote"], function apply(obj, patches){
         appliedPatch = patches;
       });
@@ -41,7 +38,7 @@ describe("JSONPatchQueue instance", function () {
 
   describe("when receives a Versioned JSON Patch", function () {
     var queue, applyPatch;
-    var obj = {};
+    
     beforeEach(function () {
       applyPatch = jasmine.createSpy("applyPatch");
       queue = new JSONPatchQueue(obj, ["/local","/remote"], function(){
@@ -60,13 +57,12 @@ describe("JSONPatchQueue instance", function () {
       ];
 
       beforeEach(function () {
-        queue.obj = {foo: 1, baz: [{qux: 'hello'}]};
         queue.receive(versionedJSONPatch3);
       });
 
       it('should not apply given JSON Patch sequence', function() {
         expect(applyPatch).not.toHaveBeenCalled()
-        expect(queue.obj).toEqual({foo: 1, baz: [{qux: 'hello'}]})
+        expect(obj).toEqual({foo: 1, baz: [{qux: 'hello'}]})
       });
       it('should place JSON Patch sequence in `.waiting` array, according to versions distance', function() {
         expect(queue.waiting).toContain([
@@ -112,25 +108,23 @@ describe("JSONPatchQueue instance", function () {
       ];
 
       beforeEach(function () {
-        queue.obj = {foo: 1, baz: [{qux: 'hello'}]};
         //add something to the queue
         queue.receive(versionedJSONPatch2);
         queue.receive(versionedJSONPatch3);
         // receive consecutive patch
         queue.receive(versionedJSONPatch1);
-
       });
 
       it('should apply given JSON Patch sequence', function() {
-        expect(applyPatch).toHaveBeenCalledWith(queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]);
-        expect(applyPatch.calls.argsFor(0)).toEqual([queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]]);
+        expect(applyPatch).toHaveBeenCalledWith(obj, [{op: 'replace', path: '/baz', value: 'smth'}]);
+        expect(applyPatch.calls.argsFor(0)).toEqual([obj, [{op: 'replace', path: '/baz', value: 'smth'}]]);
       });
       it('should apply queued, consecutive Patch sequences', function() {
         expect(applyPatch.calls.count()).toEqual(3);
         expect(applyPatch.calls.allArgs()).toEqual([
-          [queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]],// JSONPatch1
-          [queue.obj, [{op: 'add', path: '/bar', value: [1, 2, 3]}]],// JSONPatch2
-          [queue.obj, [{op: 'replace', path: '/bool', value: false}]]// JSONPatch3
+          [obj, [{op: 'replace', path: '/baz', value: 'smth'}]],// JSONPatch1
+          [obj, [{op: 'add', path: '/bar', value: [1, 2, 3]}]],// JSONPatch2
+          [obj, [{op: 'replace', path: '/bool', value: false}]]// JSONPatch3
         ]);
       });
       it('should update `remoteVersion` accordingly', function() {

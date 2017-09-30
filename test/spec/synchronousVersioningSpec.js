@@ -1,7 +1,7 @@
 if(typeof JSONPatchQueueSynchronous === 'undefined') {
   JSONPatchQueueSynchronous = require('../../src/index').JSONPatchQueueSynchronous;
 }
-var obj;
+var obj = {foo: 1, baz: [{qux: 'hello'}]};
 
 
 describe("JSONPatchQueueSynchronous instance", function () {
@@ -12,21 +12,18 @@ describe("JSONPatchQueueSynchronous instance", function () {
 
   describe('when reset', function () {
     it('should set remote version to value given', function () {
-      var obj = {};
       var queue = new JSONPatchQueueSynchronous(obj, "/version",function(){});
       queue.reset(obj, {version: 1});
       expect(queue.version).toEqual(1);
     });
     it('should set remote version to value given even with complex version path', function () {
 
-      var obj = {};
       var queue = new JSONPatchQueueSynchronous(obj, "/v/version",function(){});
       queue.reset({}, {v: {version: 1}});
       expect(queue.version).toEqual(1);
     });
     it('should apply big replace patch to obj', function () {
       var appliedPatch;
-      var obj = {};
       var queue = new JSONPatchQueueSynchronous(obj, "/version",function apply(obj, patches){
         appliedPatch = patches;
         return obj;
@@ -43,7 +40,7 @@ describe("JSONPatchQueueSynchronous instance", function () {
     var queue, applyPatch;
     beforeEach(function () {
       applyPatch = jasmine.createSpy("applyPatch");
-      queue = new JSONPatchQueueSynchronous({}, "/version",function(){
+      queue = new JSONPatchQueueSynchronous(obj, "/version",function(){
         applyPatch.apply(this, arguments);
         return arguments[0];
       });
@@ -58,13 +55,12 @@ describe("JSONPatchQueueSynchronous instance", function () {
       ];
 
       beforeEach(function () {
-        queue.obj = {foo: 1, baz: [{qux: 'hello'}]};
         queue.receive(versionedJSONPatch3);
       });
 
       it('should not apply given JSON Patch sequence', function() {
         expect(applyPatch).not.toHaveBeenCalled()
-        expect(queue.obj).toEqual({foo: 1, baz: [{qux: 'hello'}]})
+        expect(obj).toEqual({foo: 1, baz: [{qux: 'hello'}]})
       });
       it('should place JSON Patch sequence in `.waiting` array, according to versions distance', function() {
         expect(queue.waiting).toContain([
@@ -104,7 +100,6 @@ describe("JSONPatchQueueSynchronous instance", function () {
       ];
 
       beforeEach(function () {
-        queue.obj = {foo: 1, baz: [{qux: 'hello'}]}; 
         //add something to the queue
         queue.receive(versionedJSONPatch2);
         queue.receive(versionedJSONPatch3);
@@ -114,16 +109,15 @@ describe("JSONPatchQueueSynchronous instance", function () {
       });
 
       it('should apply given JSON Patch sequence', function() {
-        debugger
-        expect(applyPatch).toHaveBeenCalledWith(queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]);
-        expect(applyPatch.calls.argsFor(0)).toEqual([queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]]);
+        expect(applyPatch).toHaveBeenCalledWith(obj, [{op: 'replace', path: '/baz', value: 'smth'}]);
+        expect(applyPatch.calls.argsFor(0)).toEqual([obj, [{op: 'replace', path: '/baz', value: 'smth'}]]);
       });
       it('should apply queued, consecutive Patch sequences', function() {
         expect(applyPatch.calls.count()).toEqual(3);
         expect(applyPatch.calls.allArgs()).toEqual([
-          [queue.obj, [{op: 'replace', path: '/baz', value: 'smth'}]],// JSONPatch1
-          [queue.obj, [{op: 'add', path: '/bar', value: [1, 2, 3]}]],// JSONPatch2
-          [queue.obj, [{op: 'replace', path: '/bool', value: false}]]// JSONPatch3
+          [obj, [{op: 'replace', path: '/baz', value: 'smth'}]],// JSONPatch1
+          [obj, [{op: 'add', path: '/bar', value: [1, 2, 3]}]],// JSONPatch2
+          [obj, [{op: 'replace', path: '/bool', value: false}]]// JSONPatch3
         ]);
       });
       it('should update `version` accordingly', function() {
@@ -193,7 +187,6 @@ describe("JSONPatchQueueSynchronous instance", function () {
       queue = new JSONPatchQueueSynchronous({}, "/version",function(){}, true);
     });
     it("should send consecutiveness test",function(){
-      debugger
       var versionedJSONPatch1 = queue.send([{op: 'replace', path: '/foo', value: 'smth'}]);
       expect(versionedJSONPatch1[0]).toEqual({op: 'test', path: '/version', value: 0});
       expect(versionedJSONPatch1[1]).toEqual({op: 'replace', path: '/version', value: 1});
