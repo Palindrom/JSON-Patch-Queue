@@ -1,8 +1,6 @@
 if(typeof JSONPatchQueueSynchronous === 'undefined') {
   JSONPatchQueueSynchronous = require('../../src/index').JSONPatchQueueSynchronous;
 }
-var obj = {foo: 1, baz: [{qux: 'hello'}]};
-
 
 describe("JSONPatchQueueSynchronous instance", function () {
   it('should be created with version 0 by default', function() {
@@ -12,25 +10,28 @@ describe("JSONPatchQueueSynchronous instance", function () {
 
   describe('when reset', function () {
     it('should set remote version to value given', function () {
+      var obj = {};
       var queue = new JSONPatchQueueSynchronous(obj, "/version",function(){});
-      queue.reset(obj, {version: 1});
+      queue.reset({version: 1});
       expect(queue.version).toEqual(1);
     });
     it('should set remote version to value given even with complex version path', function () {
 
+      var obj = {};
       var queue = new JSONPatchQueueSynchronous(obj, "/v/version",function(){});
-      queue.reset({}, {v: {version: 1}});
+      queue.reset({v: {version: 1}});
       expect(queue.version).toEqual(1);
     });
     it('should apply big replace patch to obj', function () {
       var appliedPatch;
+      var obj = {};
       var queue = new JSONPatchQueueSynchronous(obj, "/version",function apply(obj, patches){
         appliedPatch = patches;
         return obj;
       });
       var newState = {version: 1, name: 'newname'};
 
-      queue.reset({}, newState);
+      queue.reset(newState);
 
       expect(appliedPatch).toEqual([{op: 'replace', path: '', value: newState}]);
     });
@@ -38,6 +39,7 @@ describe("JSONPatchQueueSynchronous instance", function () {
 
   describe("when receives a Versioned JSON Patch", function () {
     var queue, applyPatch;
+    var obj = {foo: 1, baz: [{qux: 'hello'}]}
     beforeEach(function () {
       applyPatch = jasmine.createSpy("applyPatch");
       queue = new JSONPatchQueueSynchronous(obj, "/version",function(){

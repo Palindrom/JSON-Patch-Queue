@@ -2,9 +2,6 @@ if(typeof JSONPatchQueue === 'undefined') {
   JSONPatchQueue = require('../../src/index').JSONPatchQueue;
 }
 
-var obj = {foo: 1, baz: [{qux: 'hello'}]};
-
-
 describe("JSONPatchQueue instance", function () {
   it('should be created with versions 0,0 by default', function() {
     var queue = new JSONPatchQueue({}, ["/local","/remote"],function(){});
@@ -14,23 +11,26 @@ describe("JSONPatchQueue instance", function () {
 
   describe('when reset', function () {
     it('should set remote version to value given', function () {
+      var obj = {};
       var queue = new JSONPatchQueue(obj, ["/local","/remote"],function(){});
-      queue.reset(obj, {local: 1, remote: 2});
+      queue.reset({local: 1, remote: 2});
       expect(queue.remoteVersion).toEqual(2);
     });
     it('should set remote version to value given even with complex version path', function () {
+      var obj = {};
       var queue = new JSONPatchQueue(obj, ["/v/local","/v/remote"],function(){});
-      queue.reset(obj, {v: {local: 1, remote: 2}});
+      queue.reset({v: {local: 1, remote: 2}});
       expect(queue.remoteVersion).toEqual(2);
     });
     it('should apply big replace patch to obj', function () {
       var appliedPatch;
+      var obj = {};
       var queue = new JSONPatchQueue(obj, ["/local","/remote"], function apply(obj, patches){
         appliedPatch = patches;
       });
       var newState = {local: 1, remote: 2, name: 'newname'};
 
-      queue.reset(obj, newState);
+      queue.reset(newState);
 
       expect(appliedPatch).toEqual([{op: 'replace', path: '', value: newState}]);
     });
@@ -38,7 +38,7 @@ describe("JSONPatchQueue instance", function () {
 
   describe("when receives a Versioned JSON Patch", function () {
     var queue, applyPatch;
-    
+    var obj = {foo: 1, baz: [{qux: 'hello'}]};
     beforeEach(function () {
       applyPatch = jasmine.createSpy("applyPatch");
       queue = new JSONPatchQueue(obj, ["/local","/remote"], function(){
@@ -113,6 +113,7 @@ describe("JSONPatchQueue instance", function () {
         queue.receive(versionedJSONPatch3);
         // receive consecutive patch
         queue.receive(versionedJSONPatch1);
+
       });
 
       it('should apply given JSON Patch sequence', function() {

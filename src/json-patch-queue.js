@@ -130,14 +130,13 @@ JSONPatchQueue.getPropertyByJsonPointer = function(obj, pointer) {
 
 /**
  * Reset queue internals and object to new, given state
- * @param obj object to apply new state to
  * @param newState versioned object representing desired state along with versions
  */
-JSONPatchQueue.prototype.reset = function(obj, newState){
+JSONPatchQueue.prototype.reset = function(newState){
 	this.remoteVersion = JSONPatchQueue.getPropertyByJsonPointer(newState, this.remotePath);
 	this.waiting = [];
 	var patch = [{ op: "replace", path: "", value: newState }];
-	return this.obj = this.apply(obj, patch);
+	return this.obj = this.apply(this.obj, patch);
 };
 
 if(typeof module !== 'undefined') {
