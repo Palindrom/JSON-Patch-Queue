@@ -1,5 +1,5 @@
 /**
- * version: 2.0.1
+ * version: 3.0.0-rc.0
  */
 var queue = require("./json-patch-queue");
 var sync = require("./json-patch-queue-synchronous");
