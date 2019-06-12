@@ -240,7 +240,7 @@ if (typeof Benchmark !== 'undefined') {
     }
   });
   suite.add(suite.name + ' receive operation sequence (replace)', function () {
-    banchQueue.receive(obj, [
+    banchQueue.receive([
       {op: 'replace', path: '/remote', value: remoteCounter},
       //{op: 'test', path: '/local', value: localCounter}, // OT
       {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
