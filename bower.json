@@ -20,8 +20,5 @@
     "bower_components",
     "test",
     "tests"
-  ],
-  "devDependencies": {
-    "fast-json-patch": "~0.5.0"
-  }
+  ]
 }
