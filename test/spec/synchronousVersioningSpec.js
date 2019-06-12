@@ -218,7 +218,7 @@ if (typeof Benchmark !== 'undefined') {
     }
   });
   suite.add(suite.name + ' receive operation sequence (replace)', function () {
-    banchqueue.receive([
+    banchQueue.receive([
       {op: 'replace', path: '/version', value: remoteCounter},
       {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
     ]);
@@ -236,7 +236,7 @@ if (typeof Benchmark !== 'undefined') {
     }
   });
   suite.add(suite.name + ' queue received operation sequence', function () {
-    banchqueue.receive([
+    banchQueue.receive([
       {op: 'replace', path: '/version', value: remoteCounter},
       {op: 'replace', path: '/foo', value: [1, 2, 3, 4]}
     ]);
@@ -296,10 +296,9 @@ if (typeof Benchmark !== 'undefined') {
 
   },{
     onStart: function(){
-      banchQueue = new JSONPatchQueueSynchronous("/version",function(){}, true);
-      obj = {foo: 1, baz: [
+      banchQueue = new JSONPatchQueueSynchronous({foo: 1, baz: [
         {qux: 'hello'}
-      ]};
+      ]}, "/version",function(){}, true);
       remoteCounter = 2;
       localCounter = 0;
     }
@@ -310,7 +309,7 @@ if (typeof Benchmark !== 'undefined') {
     ]);
   },{
     onStart: function(){
-      banchQueue = new JSONPatchQueueSynchronous("/version",function(){}, true);
+      banchQueue = new JSONPatchQueueSynchronous({}, "/version",function(){}, true);
       remoteCounter = 0;
       localCounter = 0;
     }
