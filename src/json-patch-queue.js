@@ -139,9 +139,5 @@ JSONPatchQueue.prototype.reset = function(newState){
 	return this.obj = this.apply(this.obj, patch);
 };
 
-if(typeof module !== 'undefined') {
-	module.exports = JSONPatchQueue;
-	module.exports.default = JSONPatchQueue;
-	/* Babel demands this */
-	module.exports.__esModule = true;
-}
+export default JSONPatchQueue;
+export { JSONPatchQueue };

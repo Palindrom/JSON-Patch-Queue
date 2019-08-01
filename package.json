@@ -2,12 +2,12 @@
   "name": "json-patch-queue",
   "version": "3.0.0-rc.0",
   "description": "Queue for Versioned JSON-Patch - makes sure that your JSON Patches (RFC6902) gets applied in correct order",
-  "main": "./src/index.js",
+  "main": "./src/json-patch-queue.js",
   "typings": "index.d.ts",
   "scripts": {
-    "test": "jasmine test/spec/*.js",
-    "test-sync": "jasmine test/spec/synchronousVersioningSpec.js",
-    "test-async": "jasmine test/spec/asyncVersioningSpec.js"
+    "test": "node --experimental-modules jasmine-run.js",
+    "test-sync": "node --experimental-modules jasmine-run.js test/spec/synchronousVersioningSpec.js",
+    "test-async": "node --experimental-modules jasmine-run.js test/spec/asyncVersioningSpec.js"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
   "engines": {
     "node": ">= 0.4.0"
   },
+  "type": "module",
   "devDependencies": {
     "benchmark": "^2.1.4",
     "grunt": "^1.0.4",

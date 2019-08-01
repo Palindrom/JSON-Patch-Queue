@@ -1,6 +1,4 @@
-if(typeof JSONPatchQueue === 'undefined') {
-  JSONPatchQueue = require('../../src/index').JSONPatchQueue;
-}
+import { JSONPatchQueue } from '../../src/json-patch-queue.js';
 
 describe("JSONPatchQueue instance", function () {
   it('should be created with versions 0,0 by default', function() {
