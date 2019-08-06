@@ -1,6 +1,6 @@
 /**
  * JSON Patch Queue for asynchronous operations, and asynchronous networking.
- * version: 3.0.0-rc.0
+ * version: 3.0.0-rc.1
  * @param {Object} obj The target object where patches are applied
  * @param {Array<JSON-Pointer>} versionPaths JSON-Pointers to version numbers [local, remote]
  * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
