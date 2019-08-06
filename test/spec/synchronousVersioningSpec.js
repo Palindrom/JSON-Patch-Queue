@@ -1,6 +1,4 @@
-if(typeof JSONPatchQueueSynchronous === 'undefined') {
-  JSONPatchQueueSynchronous = require('../../src/index').JSONPatchQueueSynchronous;
-}
+import { JSONPatchQueueSynchronous } from '../../src/json-patch-queue-synchronous.js';
 
 describe("JSONPatchQueueSynchronous instance", function () {
   it('should be created with version 0 by default', function() {

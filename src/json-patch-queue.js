@@ -6,7 +6,7 @@
  * @param {function} apply    apply(JSONobj, JSONPatchSequence) function to apply JSONPatch to object.
  * @param {Boolean} [purist]       If set to true adds test operation before replace.
  */
-var JSONPatchQueue = function(obj, versionPaths, apply, purist){
+const JSONPatchQueue = function(obj, versionPaths, apply, purist){
 
 	/**
 	 * The target object where patches are applied
@@ -59,13 +59,13 @@ JSONPatchQueue.prototype.remoteVersion = 0;
  * @param  {Function} [applyCallback]     optional `function(object, consecutivePatch)` to be called when applied, if not given #apply will be called
  */
 JSONPatchQueue.prototype.receive = function(versionedJsonPatch, applyCallback){
-	var apply = applyCallback || this.apply,
-		consecutivePatch = versionedJsonPatch.slice(0);
+	const apply = applyCallback || this.apply;
+	let consecutivePatch = versionedJsonPatch.slice(0);
 	// strip Versioned JSON Patch specyfiv operation objects from given sequence
 		if(this.purist){
-			var testRemote = consecutivePatch.shift();
+			consecutivePatch.shift();
 		}
-		var replaceRemote = consecutivePatch.shift(),
+		const replaceRemote = consecutivePatch.shift(),
 			newRemoteVersion = replaceRemote.value;
 
 	// TODO: perform versionedPath validation if needed (tomalec)
@@ -92,7 +92,7 @@ JSONPatchQueue.prototype.receive = function(versionedJsonPatch, applyCallback){
  */
 JSONPatchQueue.prototype.send = function(sequence){
 	this.localVersion++;
-	var newSequence = sequence.slice(0);
+	const newSequence = sequence.slice(0);
 	if(this.purist){
 		newSequence.unshift({ // test for consecutiveness
 			op: "test",
@@ -114,13 +114,14 @@ JSONPatchQueue.prototype.send = function(sequence){
 };
 
 JSONPatchQueue.getPropertyByJsonPointer = function(obj, pointer) {
-	var parts = pointer.split('/');
+	const parts = pointer.split('/');
 	if(parts[0] === "") {
 		parts.shift();
 	}
-	var target = obj;
+	let target = obj;
+	let path;
 	while(parts.length) {
-		var path = parts.shift().replace('~1', '/').replace('~0', '~');
+		path = parts.shift().replace('~1', '/').replace('~0', '~');
 		if(parts.length) {
 			target = target[path];
 		}
@@ -135,13 +136,9 @@ JSONPatchQueue.getPropertyByJsonPointer = function(obj, pointer) {
 JSONPatchQueue.prototype.reset = function(newState){
 	this.remoteVersion = JSONPatchQueue.getPropertyByJsonPointer(newState, this.remotePath);
 	this.waiting = [];
-	var patch = [{ op: "replace", path: "", value: newState }];
+	const patch = [{ op: "replace", path: "", value: newState }];
 	return this.obj = this.apply(this.obj, patch);
 };
 
-if(typeof module !== 'undefined') {
-	module.exports = JSONPatchQueue;
-	module.exports.default = JSONPatchQueue;
-	/* Babel demands this */
-	module.exports.__esModule = true;
-}
+export default JSONPatchQueue;
+export { JSONPatchQueue };
